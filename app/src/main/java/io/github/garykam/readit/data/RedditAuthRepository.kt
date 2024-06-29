@@ -1,7 +1,8 @@
-package io.github.garykam.readit
+package io.github.garykam.readit.data
 
 import android.net.Uri
 import android.util.Log
+import io.github.garykam.readit.data.source.remote.RedditAuthService
 import okhttp3.Credentials
 import okhttp3.FormBody
 import retrofit2.awaitResponse

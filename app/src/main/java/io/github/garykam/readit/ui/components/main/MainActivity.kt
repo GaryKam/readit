@@ -1,4 +1,4 @@
-package io.github.garykam.readit
+package io.github.garykam.readit.ui.components.main
 
 import android.content.Intent
 import android.os.Bundle
@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.garykam.readit.theme.ReadItTheme
+import io.github.garykam.readit.ui.theme.ReadItTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

@@ -1,4 +1,4 @@
-package io.github.garykam.readit
+package io.github.garykam.readit.ui.components.main
 
 import android.content.Context
 import android.content.Intent
@@ -7,6 +7,7 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.garykam.readit.data.RedditAuthRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package io.github.garykam.readit
+package io.github.garykam.readit.data.model
 
 import com.google.gson.annotations.SerializedName
 

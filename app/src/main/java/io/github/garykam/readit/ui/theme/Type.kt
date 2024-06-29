@@ -1,4 +1,4 @@
-package io.github.garykam.readit.theme
+package io.github.garykam.readit.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

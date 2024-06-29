@@ -1,4 +1,4 @@
-package io.github.garykam.readit.theme
+package io.github.garykam.readit.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
