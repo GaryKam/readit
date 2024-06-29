@@ -1,38 +1,36 @@
 package io.github.garykam.readit
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.browser.customtabs.CustomTabsIntent
+import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import dagger.hilt.android.AndroidEntryPoint
 import io.github.garykam.readit.theme.ReadItTheme
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val viewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
 
+        viewModel.launchAuthBrowser(this)
+
         setContent {
             ReadItTheme {
-                Column {
-                    val clientId = "2tTU7W_Ode727mcjbyMgKw"
-                    val state = "myRandomState"
-                    val redirectUri = "readit://auth"
-                    val duration = "permanent"
-                    val scope = "identity"
-                    val authUrl = Uri.parse(stringResource(R.string.reddit_auth_url, clientId, state, redirectUri, duration, scope))
-
-                    CustomTabsIntent.Builder().build().run {
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        launchUrl(applicationContext, authUrl)
-                    }
-                }
+                Column(modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Cyan)) {}
             }
         }
     }
@@ -40,12 +38,14 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        val error = intent?.data?.getQueryParameter("error")
-        val code = intent?.data?.getQueryParameter("code")
-        val state = intent?.data?.getQueryParameter("state")
+        val error = intent?.data?.getQueryParameter("error") ?: ""
+        val state = intent?.data?.getQueryParameter("state") ?: ""
+        val code = intent?.data?.getQueryParameter("code") ?: ""
 
-        Log.d("TokenActivity", "error: $error")
-        Log.d("TokenActivity", "code: $code")
-        Log.d("TokenActivity", "state: $state")
+        if (error.isEmpty() && state.isNotEmpty() && code.isNotEmpty()) {
+            viewModel.getAccessToken(code, state)
+        } else {
+            Log.d("MainActivity", "Failed to authenticate: $error")
+        }
     }
 }
