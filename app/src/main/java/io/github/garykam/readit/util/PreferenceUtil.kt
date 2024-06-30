@@ -5,12 +5,16 @@ import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import io.github.garykam.readit.R
+import java.time.Instant
 
 object PreferenceUtil {
     private lateinit var sharedPreferences: SharedPreferences
     private val masterKey = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
     private const val KEY_ACCESS_TOKEN = "access_token"
+    private const val KEY_REFRESH_TOKEN = "refresh_token"
+    private const val KEY_TOKEN_EXPIRATION = "token_expire"
     private const val DEFAULT_TOKEN = ""
+    private const val DEFAULT_TOKEN_EXPIRATION = -1L
 
     fun init(context: Context) {
         sharedPreferences = EncryptedSharedPreferences.create(
@@ -30,5 +34,23 @@ object PreferenceUtil {
 
     fun setAccessToken(accessToken: String) {
         sharedPreferences.edit().putString(KEY_ACCESS_TOKEN, accessToken).apply()
+    }
+
+    fun getRefreshToken(): String {
+        return sharedPreferences.getString(KEY_REFRESH_TOKEN, DEFAULT_TOKEN).orEmpty()
+    }
+
+    fun setRefreshToken(refreshToken: String) {
+        sharedPreferences.edit().putString(KEY_REFRESH_TOKEN, refreshToken).apply()
+    }
+
+    fun isTokenExpired(): Boolean {
+        sharedPreferences.getLong(KEY_TOKEN_EXPIRATION, DEFAULT_TOKEN_EXPIRATION).run {
+            return if (this == DEFAULT_TOKEN_EXPIRATION) false else Instant.now().toEpochMilli() > this
+        }
+    }
+
+    fun setTokenExpiration(expiresIn: Long) {
+        sharedPreferences.edit().putLong(KEY_TOKEN_EXPIRATION, Instant.now().plusSeconds(expiresIn).toEpochMilli()).apply()
     }
 }

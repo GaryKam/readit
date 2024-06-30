@@ -25,7 +25,7 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun getAccessToken(code: String, state: String): LiveData<RedditAuthResult> {
+    fun retrieveAccessToken(code: String, state: String): LiveData<RedditAuthResult> {
         val authResult = MutableLiveData<RedditAuthResult>()
 
         viewModelScope.launch {
@@ -33,9 +33,29 @@ class AuthViewModel @Inject constructor(
 
             if (authResponse.accessToken.isNotEmpty()) {
                 PreferenceUtil.setAccessToken(authResponse.accessToken)
+                PreferenceUtil.setRefreshToken(authResponse.refreshToken)
+                PreferenceUtil.setTokenExpiration(authResponse.expiresIn)
                 authResult.value = RedditAuthResult.Success
             } else {
                 authResult.value = RedditAuthResult.Error("Failed to retrieve access token")
+            }
+        }
+
+        return authResult
+    }
+
+    fun refreshAccessToken(): LiveData<RedditAuthResult> {
+        val authResult = MutableLiveData<RedditAuthResult>()
+
+        viewModelScope.launch {
+            val authResponse = authRepository.fetchAuthResponse()
+
+            if (authResponse.accessToken.isNotEmpty()) {
+                PreferenceUtil.setAccessToken(authResponse.accessToken)
+                PreferenceUtil.setTokenExpiration(authResponse.expiresIn)
+                authResult.value = RedditAuthResult.Success
+            } else {
+                authResult.value = RedditAuthResult.Error("Failed to refresh access token")
             }
         }
 

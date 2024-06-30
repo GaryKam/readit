@@ -16,6 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.github.garykam.readit.data.model.RedditAuthResult
 import io.github.garykam.readit.ui.components.main.MainActivity
 import io.github.garykam.readit.ui.theme.ReadItTheme
+import io.github.garykam.readit.util.PreferenceUtil
 
 @AndroidEntryPoint
 class AuthActivity : ComponentActivity() {
@@ -25,6 +26,11 @@ class AuthActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
+
+        if (PreferenceUtil.isTokenExpired()) {
+            viewModel.refreshAccessToken()
+            startActivity(Intent(this, MainActivity::class.java))
+        }
 
         setContent {
             ReadItTheme {
@@ -45,7 +51,7 @@ class AuthActivity : ComponentActivity() {
         val code = intent?.data?.getQueryParameter("code") ?: ""
 
         if (error.isEmpty() && state.isNotEmpty() && code.isNotEmpty()) {
-            viewModel.getAccessToken(code, state).observe(this) { authResult ->
+            viewModel.retrieveAccessToken(code, state).observe(this) { authResult ->
                 when (authResult) {
                     is RedditAuthResult.Success -> {
                         startActivity(Intent(this, MainActivity::class.java))

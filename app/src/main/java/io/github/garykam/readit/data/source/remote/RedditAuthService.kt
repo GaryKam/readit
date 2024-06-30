@@ -13,7 +13,7 @@ import retrofit2.http.POST
 interface RedditAuthService {
     @Headers(USER_AGENT_HEADER)
     @POST("v1/access_token")
-    fun getAccessToken(
+    fun getAuthResponse(
         @Header("Authorization") credentials: String,
         @Body body: FormBody
     ): Call<RedditAuthResponse>

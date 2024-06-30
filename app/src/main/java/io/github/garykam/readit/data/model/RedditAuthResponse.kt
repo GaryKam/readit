@@ -8,5 +8,5 @@ data class RedditAuthResponse(
     @SerializedName("refresh_token")
     val refreshToken: String,
     @SerializedName("expires_in")
-    val expiration: Int
+    val expiresIn: Long
 )
