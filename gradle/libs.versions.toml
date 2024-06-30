@@ -15,12 +15,14 @@ kotlin = "1.9.0"
 ksp = "1.9.10-1.0.13"
 lifecycleRuntimeKtx = "2.6.1"
 retrofit = "2.11.0"
+securityCryptoVersion = "1.0.0"
 
 
 [libraries]
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCryptoVersion" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }

@@ -1,32 +1,30 @@
 package io.github.garykam.readit.ui.components.main
 
-import android.content.Context
-import android.content.Intent
-import android.util.Log
-import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.garykam.readit.data.RedditAuthRepository
-import kotlinx.coroutines.Dispatchers
+import io.github.garykam.readit.data.RedditApiRepository
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val authRepository: RedditAuthRepository
+    private val apiRepository: RedditApiRepository
 ) : ViewModel() {
-    fun launchAuthBrowser(context: Context) {
-        CustomTabsIntent.Builder().build().run {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            launchUrl(context, authRepository.authUrl)
-        }
-    }
+    var name by mutableStateOf("")
+        private set
+    var karma by mutableIntStateOf(0)
+        private set
 
-    fun getAccessToken(code: String, state: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val accessToken = authRepository.fetchAccessToken(code, state)
-            Log.d("MainViewModel", "access token: $accessToken")
+    fun getUser() {
+        viewModelScope.launch {
+            val user = apiRepository.getUser()
+            name = user?.name ?: "null"
+            karma = user?.karma?.toInt() ?: 0
         }
     }
 }

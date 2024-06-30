@@ -67,6 +67,9 @@ dependencies {
     // Custom Tabs
     implementation(libs.androidx.browser)
 
+    // Encrypted Preferences
+    implementation(libs.androidx.security.crypto)
+
     // Hilt
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)

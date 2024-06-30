@@ -1,17 +1,15 @@
 package io.github.garykam.readit.ui.components.main
 
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.garykam.readit.ui.theme.ReadItTheme
 
@@ -24,28 +22,16 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
 
-        viewModel.launchAuthBrowser(this)
-
         setContent {
             ReadItTheme {
-                Column(modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Cyan)) {}
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Text(text = "Username: ${viewModel.name}")
+                    Text(text = "Karma: ${viewModel.karma}")
+                    Button(onClick = { viewModel.getUser() }) {
+                        Text(text = "Get user")
+                    }
+                }
             }
-        }
-    }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-
-        val error = intent?.data?.getQueryParameter("error") ?: ""
-        val state = intent?.data?.getQueryParameter("state") ?: ""
-        val code = intent?.data?.getQueryParameter("code") ?: ""
-
-        if (error.isEmpty() && state.isNotEmpty() && code.isNotEmpty()) {
-            viewModel.getAccessToken(code, state)
-        } else {
-            Log.d("MainActivity", "Failed to authenticate: $error")
         }
     }
 }

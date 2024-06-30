@@ -2,6 +2,7 @@ package io.github.garykam.readit.data
 
 import android.net.Uri
 import android.util.Log
+import io.github.garykam.readit.data.model.RedditAuthResponse
 import io.github.garykam.readit.data.source.remote.RedditAuthService
 import okhttp3.Credentials
 import okhttp3.FormBody
@@ -20,7 +21,7 @@ class RedditAuthRepository @Inject constructor(
         }
     private var state = ""
 
-    suspend fun fetchAccessToken(code: String, state: String): String {
+    suspend fun fetchAuthResponse(code: String, state: String): RedditAuthResponse {
         if (state != this.state) {
             throw Exception("Invalid state")
         }
@@ -35,8 +36,8 @@ class RedditAuthRepository @Inject constructor(
         val response = auth.getAccessToken(credentials, body).awaitResponse()
 
         if (response.isSuccessful) {
-            Log.d("RedditAuthRepository", "Successfully retrieved access token")
-            return response.body()!!.accessToken
+            Log.d("RedditAuthRepository", "Successfully retrieved response")
+            return response.body()!!
         } else {
             throw Exception(response.errorBody().toString())
         }
@@ -51,7 +52,7 @@ class RedditAuthRepository @Inject constructor(
         private const val AUTH_URL = "https://www.reddit.com/api/v1/authorize?client_id=%s&response_type=code&state=%s&redirect_uri=%s&duration=%s&scope=%s"
         private const val CLIENT_ID = "2tTU7W_Ode727mcjbyMgKw"
         private const val REDIRECT_URI = "readit://auth"
-        private const val DURATION = "permanent"
+        private const val DURATION = "temporary"
         private const val SCOPE = "identity"
     }
 }
