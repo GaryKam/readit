@@ -1,4 +1,4 @@
-package io.github.garykam.readit.data
+package io.github.garykam.readit.data.repository
 
 import android.net.Uri
 import android.util.Log
@@ -71,6 +71,6 @@ class RedditAuthRepository @Inject constructor(
         private const val CLIENT_ID = "2tTU7W_Ode727mcjbyMgKw"
         private const val REDIRECT_URI = "readit://auth"
         private const val DURATION = "permanent"
-        private const val SCOPE = "identity"
+        private const val SCOPE = "identity,mysubreddits"
     }
 }

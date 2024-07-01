@@ -26,6 +26,10 @@ object PreferenceUtil {
         )
     }
 
+    fun isLoggedIn(): Boolean {
+        return getAccessToken() != DEFAULT_TOKEN
+    }
+
     fun getAccessToken(): String {
         sharedPreferences.getString(KEY_ACCESS_TOKEN, DEFAULT_TOKEN)!!.run {
             return if (isEmpty()) DEFAULT_TOKEN else "Bearer $this"

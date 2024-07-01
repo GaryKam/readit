@@ -1,4 +1,4 @@
-package io.github.garykam.readit.ui.components.auth
+package io.github.garykam.readit.ui.component.auth
 
 import android.content.Intent
 import android.os.Bundle
@@ -12,9 +12,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.garykam.readit.data.model.RedditAuthResult
-import io.github.garykam.readit.ui.components.main.MainActivity
+import io.github.garykam.readit.ui.component.main.MainActivity
 import io.github.garykam.readit.ui.theme.ReadItTheme
 import io.github.garykam.readit.util.PreferenceUtil
 
@@ -23,13 +24,25 @@ class AuthActivity : ComponentActivity() {
     private val viewModel: AuthViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
+
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
 
         if (PreferenceUtil.isTokenExpired()) {
+            splashScreen.setKeepOnScreenCondition { true }
             viewModel.refreshAccessToken()
             startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return
+        }
+
+        if (PreferenceUtil.isLoggedIn()) {
+            splashScreen.setKeepOnScreenCondition { true }
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return
         }
 
         setContent {

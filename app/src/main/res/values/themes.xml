@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.ReadIt" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.ReadIt.Splash" parent="Theme.SplashScreen.IconBackground">
+        <item name="windowSplashScreenBackground">@color/teal_200</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/purple_200</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.ReadIt</item>
+    </style>
 </resources>
