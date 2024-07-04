@@ -1,8 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.google.dagger.hilt.android)
     alias(libs.plugins.google.devtools.ksp)
-    alias(libs.plugins.jetbrains.kotlin.android)
+    kotlin("plugin.serialization") version "2.0.0"
 }
 
 android {
@@ -75,9 +77,15 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
 
+    // Navigation
+    implementation(libs.androidx.navigation.compose)
+
     // Retrofit
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+
+    // Serialization
+    implementation(libs.kotlinx.serialization.json)
 
     // Splash Screen
     implementation(libs.androidx.core.splashscreen)

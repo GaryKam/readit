@@ -9,11 +9,11 @@ import io.github.garykam.readit.ui.component.subreddit.SubredditScreen
 
 @Composable
 fun ReadItNavHost(
-    startScreen: Screen = Screen.Subreddit,
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    startDestination: Destination = Subreddit,
 ) {
-    NavHost(navController = navController, startDestination = startScreen.route) {
-        composable(Screen.Subreddit.route) {
+    NavHost(navController = navController, startDestination = startDestination) {
+        composable<Subreddit> {
             SubredditScreen()
         }
     }
