@@ -11,6 +11,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -20,12 +22,15 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SubredditScreen(
+    modifier: Modifier = Modifier,
     viewModel: SubredditViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
     val drawerState = DrawerState(initialValue = DrawerValue.Closed)
+    val items by viewModel.subscribedSubreddits.collectAsState()
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {},
@@ -44,15 +49,15 @@ fun SubredditScreen(
         }
     ) { innerPadding ->
         ItemDrawer(
-            modifier = Modifier.padding(innerPadding),
-            items = viewModel.subscribedSubreddits.map { it.data.prefixedName },
+            items = items.map { it.data.prefixedName },
             selectedItem = "",
             drawerState = drawerState,
             onItemClick = {
                 scope.launch {
                     drawerState.close()
                 }
-            }
+            },
+            modifier = Modifier.padding(innerPadding)
         ) {}
     }
 }

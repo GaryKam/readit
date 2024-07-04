@@ -77,6 +77,9 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
 
+    // Linter
+    lintChecks(libs.compose.lint.checks)
+
     // Navigation
     implementation(libs.androidx.navigation.compose)
 

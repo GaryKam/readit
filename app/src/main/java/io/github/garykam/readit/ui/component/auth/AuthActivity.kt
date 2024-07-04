@@ -32,9 +32,19 @@ class AuthActivity : ComponentActivity() {
 
         if (PreferenceUtil.isTokenExpired()) {
             splashScreen.setKeepOnScreenCondition { true }
-            viewModel.refreshAccessToken()
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
+            viewModel.refreshAccessToken().observe(this) { authResult ->
+                when (authResult) {
+                    is RedditAuthResult.Success -> {
+                        startActivity(Intent(this, MainActivity::class.java))
+                        finish()
+                    }
+
+                    is RedditAuthResult.Error -> {
+                        Log.d("AuthActivity", authResult.errorMessage)
+                    }
+                }
+            }
+
             return
         }
 

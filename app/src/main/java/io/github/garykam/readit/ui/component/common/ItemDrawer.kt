@@ -16,11 +16,11 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun ItemDrawer(
-    modifier: Modifier = Modifier,
     items: List<String>,
     selectedItem: String,
     drawerState: DrawerState,
     onItemClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
     ModalNavigationDrawer(

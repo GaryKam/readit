@@ -12,6 +12,7 @@ import io.github.garykam.readit.data.repository.RedditAuthRepository
 import io.github.garykam.readit.data.model.RedditAuthResult
 import io.github.garykam.readit.util.PreferenceUtil
 import kotlinx.coroutines.launch
+import java.time.Instant
 import javax.inject.Inject
 
 @HiltViewModel
@@ -34,7 +35,7 @@ class AuthViewModel @Inject constructor(
             if (authResponse.accessToken.isNotEmpty()) {
                 PreferenceUtil.setAccessToken(authResponse.accessToken)
                 PreferenceUtil.setRefreshToken(authResponse.refreshToken)
-                PreferenceUtil.setTokenExpiration(authResponse.expiresIn)
+                PreferenceUtil.setTokenExpiration(Instant.now().plusSeconds(authResponse.expiresIn).toEpochMilli())
                 authResult.value = RedditAuthResult.Success
             } else {
                 authResult.value = RedditAuthResult.Error("Failed to retrieve access token")
@@ -52,7 +53,7 @@ class AuthViewModel @Inject constructor(
 
             if (authResponse.accessToken.isNotEmpty()) {
                 PreferenceUtil.setAccessToken(authResponse.accessToken)
-                PreferenceUtil.setTokenExpiration(authResponse.expiresIn)
+                PreferenceUtil.setTokenExpiration(Instant.now().plusSeconds(authResponse.expiresIn).toEpochMilli())
                 authResult.value = RedditAuthResult.Success
             } else {
                 authResult.value = RedditAuthResult.Error("Failed to refresh access token")
