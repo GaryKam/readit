@@ -4,12 +4,14 @@ import com.google.gson.annotations.SerializedName
 
 data class Subreddit(
     val kind: String,
-    val data: SubredditData
-)
+    val data: Data
+) {
+    data class Data(
+        @SerializedName("title")
+        val displayName: String,
+        @SerializedName("display_name_prefixed")
+        val prefixedName: String,
+    )
+}
 
-data class SubredditData(
-    @SerializedName("title")
-    val displayName: String,
-    @SerializedName("display_name_prefixed")
-    val prefixedName: String,
-)
+

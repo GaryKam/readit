@@ -77,6 +77,9 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
 
+    // Immutable Collections
+    implementation(libs.kotlinx.collections.immutable)
+
     // Linter
     lintChecks(libs.compose.lint.checks)
 

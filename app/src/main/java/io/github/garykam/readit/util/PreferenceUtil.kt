@@ -30,6 +30,12 @@ object PreferenceUtil {
         return getAccessToken() != DEFAULT_TOKEN
     }
 
+    fun logOut() {
+        setAccessToken(DEFAULT_TOKEN)
+        setRefreshToken(DEFAULT_TOKEN)
+        setTokenExpiration(DEFAULT_TOKEN_EXPIRATION)
+    }
+
     fun getAccessToken(): String {
         sharedPreferences.getString(KEY_ACCESS_TOKEN, DEFAULT_TOKEN)!!.run {
             return if (isEmpty()) DEFAULT_TOKEN else "Bearer $this"
@@ -54,7 +60,7 @@ object PreferenceUtil {
         }
     }
 
-    fun setTokenExpiration(expiresIn: Long) {
-        sharedPreferences.edit().putLong(KEY_TOKEN_EXPIRATION, Instant.now().plusSeconds(expiresIn).toEpochMilli()).apply()
+    fun setTokenExpiration(expiresAt: Long) {
+        sharedPreferences.edit().putLong(KEY_TOKEN_EXPIRATION, expiresAt).apply()
     }
 }
