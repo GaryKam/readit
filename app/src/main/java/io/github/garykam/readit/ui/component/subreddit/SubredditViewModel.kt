@@ -1,11 +1,13 @@
 package io.github.garykam.readit.ui.component.subreddit
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.garykam.readit.data.model.RedditUser
 import io.github.garykam.readit.data.model.Subreddit
 import io.github.garykam.readit.data.model.SubredditPost
 import io.github.garykam.readit.data.repository.RedditApiRepository
@@ -19,15 +21,19 @@ import javax.inject.Inject
 class SubredditViewModel @Inject constructor(
     private val repository: RedditApiRepository
 ) : ViewModel() {
+    private val _user = MutableStateFlow<RedditUser?>(null)
+    val user = _user.asStateFlow()
     private val _subscribedSubreddits = MutableStateFlow<List<Subreddit>>(emptyList())
     val subscribedSubreddits = _subscribedSubreddits.asStateFlow()
     private val _subredditPosts = MutableStateFlow<List<SubredditPost>>(emptyList())
     val subredditPosts = _subredditPosts.asStateFlow()
+
     var subreddit by mutableStateOf("")
         private set
 
     init {
         viewModelScope.launch {
+            _user.update { repository.getUser() }
             repository.getSubscribedSubredditsListing()?.data?.children?.let { subreddits ->
                 _subscribedSubreddits.update { subreddits }
             }

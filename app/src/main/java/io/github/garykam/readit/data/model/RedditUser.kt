@@ -5,5 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class RedditUser(
     val name: String,
     @SerializedName("total_karma")
-    val karma: String
+    val karma: String,
+    @SerializedName("snoovatar_img")
+    val avatar: String
 )

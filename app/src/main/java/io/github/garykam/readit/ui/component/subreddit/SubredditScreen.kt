@@ -1,6 +1,5 @@
 package io.github.garykam.readit.ui.component.subreddit
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
@@ -30,8 +30,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import io.github.garykam.readit.data.model.SubredditPost
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -40,6 +42,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SubredditScreen(
+    onProfileClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SubredditViewModel = hiltViewModel()
 ) {
@@ -47,6 +50,7 @@ fun SubredditScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val subreddits by viewModel.subscribedSubreddits.collectAsState()
     val subredditPosts by viewModel.subredditPosts.collectAsState()
+    val user by viewModel.user.collectAsState()
 
     Scaffold(
         modifier = modifier,
@@ -54,14 +58,23 @@ fun SubredditScreen(
             TopAppBar(
                 title = {},
                 navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            scope.launch {
-                                drawerState.apply { if (isClosed) open() else close() }
-                            }
+                    IconButton(onClick = {
+                        scope.launch {
+                            drawerState.apply { if (isClosed) open() else close() }
                         }
-                    ) {
-                        Icon(imageVector = Icons.Default.Menu, contentDescription = null)
+                    }) {
+                        Icon(imageVector = Icons.Default.Menu, contentDescription = "menu")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onProfileClick) {
+                        AsyncImage(
+                            model = user?.avatar, contentDescription = "profile",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Fit
+                        )
                     }
                 }
             )
@@ -83,7 +96,6 @@ fun SubredditScreen(
                 posts = subredditPosts.toImmutableList(),
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Gray)
             )
         }
     }
