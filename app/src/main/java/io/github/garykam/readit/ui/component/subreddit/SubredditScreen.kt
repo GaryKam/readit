@@ -1,7 +1,11 @@
 package io.github.garykam.readit.ui.component.subreddit
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,13 +22,13 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
@@ -35,9 +39,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.fromHtml
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import io.github.garykam.readit.data.model.SubredditPost
+import io.github.garykam.readit.util.toElapsed
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
@@ -96,8 +108,11 @@ fun SubredditScreen(
         ) {
             SubredditPosts(
                 posts = subredditPosts.toImmutableList(),
+                onPostClick = { },
                 onLoadClick = { viewModel.showPosts() },
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
             )
         }
     }
@@ -148,13 +163,21 @@ private fun ItemDrawer(
 @Composable
 private fun SubredditPosts(
     posts: ImmutableList<SubredditPost>,
+    onPostClick: (String) -> Unit,
     onLoadClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(modifier = modifier) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         items(posts) { post ->
-            Text(text = post.data.title)
-            HorizontalDivider(modifier = Modifier.fillMaxWidth())
+            SubredditPost(
+                data = post.data,
+                onPostClick = onPostClick,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
 
         if (posts.isNotEmpty()) {
@@ -167,6 +190,46 @@ private fun SubredditPosts(
                         Text(text = "Load More")
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SubredditPost(
+    data: SubredditPost.Data,
+    onPostClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shadowElevation = 8.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .clickable { onPostClick(data.id) }
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = "u/${data.author} • ${data.created.toElapsed()} ago",
+                style = MaterialTheme.typography.labelMedium
+            )
+            Text(
+                text = data.title.removeSuffix("\n"),
+                modifier = Modifier.padding(vertical = 4.dp),
+                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            if (!data.text.isNullOrEmpty()) {
+                Text(
+                    text = AnnotatedString.fromHtml(
+                        data.text,
+                        linkStyles = TextLinkStyles(style = SpanStyle(color = MaterialTheme.colorScheme.primary))
+                    ),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 4,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
     }

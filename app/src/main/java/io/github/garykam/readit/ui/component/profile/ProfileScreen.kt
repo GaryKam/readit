@@ -54,10 +54,17 @@ fun ProfileScreen(
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            AsyncImage(model = user?.avatar, contentDescription = null)
+            AsyncImage(
+                model = user?.avatar,
+                contentDescription = null
+            )
             Text(text = user?.name.orEmpty())
             Text(text = "${(user?.karma ?: 0)} Karma")
-            Spacer(modifier = Modifier.fillMaxWidth().height(160.dp))
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(160.dp)
+            )
             Button(
                 onClick = {
                     onLogOut()
