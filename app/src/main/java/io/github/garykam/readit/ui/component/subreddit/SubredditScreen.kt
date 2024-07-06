@@ -1,6 +1,8 @@
 package io.github.garykam.readit.ui.component.subreddit
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +18,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,11 +49,11 @@ fun SubredditScreen(
     modifier: Modifier = Modifier,
     viewModel: SubredditViewModel = hiltViewModel()
 ) {
-    val scope = rememberCoroutineScope()
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val user by viewModel.user.collectAsState()
     val subreddits by viewModel.subscribedSubreddits.collectAsState()
     val subredditPosts by viewModel.subredditPosts.collectAsState()
-    val user by viewModel.user.collectAsState()
+    val scope = rememberCoroutineScope()
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     Scaffold(
         modifier = modifier,
@@ -69,7 +72,8 @@ fun SubredditScreen(
                 actions = {
                     IconButton(onClick = onProfileClick) {
                         AsyncImage(
-                            model = user?.avatar, contentDescription = "profile",
+                            model = user?.avatar,
+                            contentDescription = "profile",
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clip(CircleShape),
@@ -86,16 +90,14 @@ fun SubredditScreen(
             drawerState = drawerState,
             onItemClick = {
                 viewModel.clickSubreddit(it)
-                scope.launch {
-                    drawerState.close()
-                }
+                scope.launch { drawerState.close() }
             },
             modifier = Modifier.padding(innerPadding)
         ) {
             SubredditPosts(
                 posts = subredditPosts.toImmutableList(),
-                modifier = Modifier
-                    .fillMaxSize()
+                onLoadClick = { viewModel.showPosts() },
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
@@ -146,11 +148,26 @@ private fun ItemDrawer(
 @Composable
 private fun SubredditPosts(
     posts: ImmutableList<SubredditPost>,
+    onLoadClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(modifier = modifier) {
         items(posts) { post ->
             Text(text = post.data.title)
+            HorizontalDivider(modifier = Modifier.fillMaxWidth())
+        }
+
+        if (posts.isNotEmpty()) {
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Button(onClick = onLoadClick) {
+                        Text(text = "Load More")
+                    }
+                }
+            }
         }
     }
 }

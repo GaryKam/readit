@@ -2,14 +2,17 @@ package io.github.garykam.readit.ui.component.auth
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.garykam.readit.data.repository.RedditAuthRepository
+import io.github.garykam.readit.R
 import io.github.garykam.readit.data.model.RedditAuthResult
+import io.github.garykam.readit.data.repository.RedditAuthRepository
 import io.github.garykam.readit.util.PreferenceUtil
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -20,10 +23,20 @@ class AuthViewModel @Inject constructor(
     private val repository: RedditAuthRepository
 ) : ViewModel() {
     fun launchAuthBrowser(context: Context) {
-        CustomTabsIntent.Builder().build().run {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK + Intent.FLAG_ACTIVITY_NO_HISTORY)
-            launchUrl(context, repository.authUrl)
-        }
+        CustomTabsIntent.Builder()
+            .setDefaultColorSchemeParams(CustomTabColorSchemeParams.Builder().setToolbarColor(Color.WHITE).build())
+            .setColorSchemeParams(CustomTabsIntent.COLOR_SCHEME_DARK, CustomTabColorSchemeParams.Builder().setToolbarColor(Color.BLACK).build())
+            .setShowTitle(false)
+            .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
+            .setBookmarksButtonEnabled(false)
+            .setDownloadButtonEnabled(false)
+            .setStartAnimations(context, R.anim.slide_in_right, R.anim.slide_out_left)
+            .setExitAnimations(context, android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+            .build()
+            .run {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK + Intent.FLAG_ACTIVITY_NO_HISTORY)
+                launchUrl(context, repository.authUrl)
+            }
     }
 
     fun retrieveAccessToken(code: String, state: String): LiveData<RedditAuthResult> {

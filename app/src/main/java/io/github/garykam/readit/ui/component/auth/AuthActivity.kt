@@ -7,10 +7,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
@@ -57,8 +59,12 @@ class AuthActivity : ComponentActivity() {
 
         setContent {
             ReadItTheme {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    Button(onClick = { viewModel.launchAuthBrowser(applicationContext) }) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Button(onClick = { viewModel.launchAuthBrowser(this@AuthActivity) }) {
                         Text(text = "Authenticate")
                     }
                 }

@@ -3,7 +3,6 @@ package io.github.garykam.readit.data.model
 import com.google.gson.annotations.SerializedName
 
 data class SubredditPost(
-    val kind: String,
     val data: Data
 ) {
     data class Data(

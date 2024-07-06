@@ -16,33 +16,35 @@ import retrofit2.http.Query
 interface RedditApiService {
     @Headers(USER_AGENT_HEADER)
     @GET("api/v1/me")
-    fun getUser(
+    fun getRedditUser(
         @Header("Authorization") bearer: String,
         @Query("raw_json") rawJson: Int = 1
     ): Call<RedditUser>
 
     @Headers(USER_AGENT_HEADER)
     @GET("subreddits/mine/subscriber")
-    fun getSubscribedSubreddits(
+    fun getSubscribedSubredditsListing(
         @Header("Authorization") bearer: String,
         @Query("raw_json") rawJson: Int = 1
     ): Call<RedditListing<Subreddit>>
 
     @Headers(USER_AGENT_HEADER)
     @GET("r/{subreddit}/{order}")
-    fun getSubredditPosts(
+    fun getSubredditPostsListing(
         @Header("Authorization") bearer: String,
         @Path("subreddit") subreddit: String,
         @Path("order") order: String,
+        @Query("after") after: String?,
         @Query("raw_json") rawJson: Int = 1
     ): Call<RedditListing<SubredditPost>>
 
     @Headers(USER_AGENT_HEADER)
     @GET("user/{user}/{where}")
-    fun getUserSubreddit(
+    fun getUserSubredditListing(
         @Header("Authorization") bearer: String,
         @Path("user") user: String,
         @Path("where") where: String,
+        @Query("after") after: String?,
         @Query("raw_json") rawJson: Int = 1
     ): Call<RedditListing<SubredditPost>>
 

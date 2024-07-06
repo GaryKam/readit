@@ -1,6 +1,5 @@
 package io.github.garykam.readit.ui.component.subreddit
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -27,30 +26,44 @@ class SubredditViewModel @Inject constructor(
     val subscribedSubreddits = _subscribedSubreddits.asStateFlow()
     private val _subredditPosts = MutableStateFlow<List<SubredditPost>>(emptyList())
     val subredditPosts = _subredditPosts.asStateFlow()
-
     var subreddit by mutableStateOf("")
         private set
+    private var after: String? = null
 
     init {
         viewModelScope.launch {
             _user.update { repository.getUser() }
-            repository.getSubscribedSubredditsListing()?.data?.children?.let { subreddits ->
+            repository.getSubscribedSubreddits()?.data?.children?.let { subreddits ->
                 _subscribedSubreddits.update { subreddits }
             }
         }
     }
 
     fun clickSubreddit(subreddit: String) {
+        if (this.subreddit == subreddit) {
+            return
+        }
+
         this.subreddit = subreddit
+        _subredditPosts.update { emptyList() }
+        after = null
+
+        showPosts()
+    }
+
+    fun showPosts() {
         viewModelScope.launch {
-            if (subreddit.startsWith("r/")) {
-                repository.getSubredditPosts(subreddit.removePrefix("r/"))?.data?.children?.let { posts ->
-                    _subredditPosts.update { posts }
-                }
+            val subredditPosts = if (subreddit.startsWith("r/")) {
+                repository.getSubredditPosts(subreddit.removePrefix("r/"), after = after)
             } else if (subreddit.startsWith("u/")) {
-                repository.getUserSubreddit(subreddit.removePrefix("u/"))?.data?.children?.let { posts ->
-                    _subredditPosts.update { posts }
-                }
+                repository.getUserSubreddit(subreddit.removePrefix("u/"), after = after)
+            } else {
+                null
+            }
+
+            subredditPosts?.data?.let { data ->
+                _subredditPosts.update { it + data.children }
+                after = data.after
             }
         }
     }

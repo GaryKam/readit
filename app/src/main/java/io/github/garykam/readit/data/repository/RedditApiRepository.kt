@@ -18,24 +18,26 @@ class RedditApiRepository @Inject constructor(
         get() = PreferenceUtil.getAccessToken()
 
     suspend fun getUser(): RedditUser? {
-        return api.getUser(accessToken).awaitResponse().body()
+        return api.getRedditUser(accessToken).awaitResponse().body()
     }
 
-    suspend fun getSubscribedSubredditsListing(): RedditListing<Subreddit>? {
-        return api.getSubscribedSubreddits(accessToken).awaitResponse().body()
+    suspend fun getSubscribedSubreddits(): RedditListing<Subreddit>? {
+        return api.getSubscribedSubredditsListing(accessToken).awaitResponse().body()
     }
 
     suspend fun getSubredditPosts(
         subreddit: String,
-        order: String = "new"
+        order: String = "new",
+        after: String? = null
     ): RedditListing<SubredditPost>? {
-        return api.getSubredditPosts(accessToken, subreddit, order).awaitResponse().body()
+        return api.getSubredditPostsListing(accessToken, subreddit, order, after).awaitResponse().body()
     }
 
     suspend fun getUserSubreddit(
         user: String,
-        where: String = "submitted"
+        where: String = "submitted",
+        after: String? = null
     ): RedditListing<SubredditPost>? {
-        return api.getUserSubreddit(accessToken, user, where).awaitResponse().body()
+        return api.getUserSubredditListing(accessToken, user, where, after).awaitResponse().body()
     }
 }
