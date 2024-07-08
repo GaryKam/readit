@@ -8,4 +8,7 @@ sealed class Destination
 data object Subreddit : Destination()
 
 @Serializable
+data class RedditPost(val postId: String) : Destination()
+
+@Serializable
 data object Profile : Destination()
