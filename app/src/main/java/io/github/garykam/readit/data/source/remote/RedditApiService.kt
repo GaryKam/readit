@@ -3,7 +3,8 @@ package io.github.garykam.readit.data.source.remote
 import io.github.garykam.readit.data.model.RedditListing
 import io.github.garykam.readit.data.model.RedditUser
 import io.github.garykam.readit.data.model.Subreddit
-import io.github.garykam.readit.data.model.SubredditPost
+import io.github.garykam.readit.data.model.RedditPost
+import io.github.garykam.readit.data.model.RedditPostComment
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -36,17 +37,26 @@ interface RedditApiService {
         @Path("order") order: String,
         @Query("after") after: String?,
         @Query("raw_json") rawJson: Int = 1
-    ): Call<RedditListing<SubredditPost>>
+    ): Call<RedditListing<RedditPost>>
 
     @Headers(USER_AGENT_HEADER)
     @GET("user/{user}/{where}")
-    fun getUserSubredditListing(
+    fun getUserProfilePostsListing(
         @Header("Authorization") bearer: String,
         @Path("user") user: String,
         @Path("where") where: String,
         @Query("after") after: String?,
         @Query("raw_json") rawJson: Int = 1
-    ): Call<RedditListing<SubredditPost>>
+    ): Call<RedditListing<RedditPost>>
+
+    @Headers(USER_AGENT_HEADER)
+    @GET("r/{subreddit}/comments/{article}")
+    fun getRedditPostCommentsListing(
+        @Header("Authorization") bearer: String,
+        @Path("subreddit") subreddit: String,
+        @Path("article") postId: String,
+        @Query("raw_json") rawJson: Int = 1
+    ): Call<List<RedditListing<RedditPostComment>>>
 
     companion object {
         private const val USER_AGENT_HEADER = "User-Agent: android:io.github.garykam.readit:v0.0.1 (by /u/garyeeb)"

@@ -3,7 +3,8 @@ package io.github.garykam.readit.data.repository
 import io.github.garykam.readit.data.model.RedditListing
 import io.github.garykam.readit.data.model.RedditUser
 import io.github.garykam.readit.data.model.Subreddit
-import io.github.garykam.readit.data.model.SubredditPost
+import io.github.garykam.readit.data.model.RedditPost
+import io.github.garykam.readit.data.model.RedditPostComment
 import io.github.garykam.readit.data.source.remote.RedditApiService
 import io.github.garykam.readit.util.PreferenceUtil
 import retrofit2.awaitResponse
@@ -25,19 +26,26 @@ class RedditApiRepository @Inject constructor(
         return api.getSubscribedSubredditsListing(accessToken).awaitResponse().body()
     }
 
-    suspend fun getSubredditPosts(
+    suspend fun getPostsFromSubreddit(
         subreddit: String,
         order: String = "new",
         after: String? = null
-    ): RedditListing<SubredditPost>? {
+    ): RedditListing<RedditPost>? {
         return api.getSubredditPostsListing(accessToken, subreddit, order, after).awaitResponse().body()
     }
 
-    suspend fun getUserSubreddit(
+    suspend fun getPostsFromUserProfile(
         user: String,
         where: String = "submitted",
         after: String? = null
-    ): RedditListing<SubredditPost>? {
-        return api.getUserSubredditListing(accessToken, user, where, after).awaitResponse().body()
+    ): RedditListing<RedditPost>? {
+        return api.getUserProfilePostsListing(accessToken, user, where, after).awaitResponse().body()
+    }
+
+    suspend fun getCommentsFromId(
+        subreddit: String,
+        postId: String
+    ): List<RedditListing<RedditPostComment>>? {
+        return api.getRedditPostCommentsListing(accessToken, subreddit, postId).awaitResponse().body()
     }
 }

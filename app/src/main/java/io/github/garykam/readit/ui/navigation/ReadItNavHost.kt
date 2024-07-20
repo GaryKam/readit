@@ -36,7 +36,7 @@ fun ReadItNavHost(
         composable<Subreddit> {
             SubredditScreen(
                 onAppBarStateUpdate = onAppBarStateUpdate,
-                onNavigateToRedditPost = { postId -> navController.navigate(RedditPost(postId)) },
+                onNavigateToRedditPost = { subreddit, postId -> navController.navigate(RedditPost(subreddit, postId)) },
                 onNavigateToProfile = { navController.navigate(Profile) },
                 modifier = Modifier.fillMaxSize(),
                 viewModel = subredditViewModel
@@ -44,8 +44,10 @@ fun ReadItNavHost(
         }
 
         composable<RedditPost> { backStackEntry ->
+            val route = backStackEntry.toRoute() as RedditPost
             RedditPostScreen(
-                postId = (backStackEntry.toRoute() as RedditPost).postId,
+                subreddit = route.subreddit,
+                postId = route.postId,
                 onAppBarStateUpdate = onAppBarStateUpdate,
                 onNavigateBack = { navController.navigate(Subreddit) }
             )

@@ -37,16 +37,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import io.github.garykam.readit.data.model.SubredditPost
+import io.github.garykam.readit.data.model.RedditPost
+import io.github.garykam.readit.ui.component.common.HtmlText
 import io.github.garykam.readit.ui.component.main.AppBarState
 import io.github.garykam.readit.util.toElapsed
 import kotlinx.collections.immutable.ImmutableList
@@ -56,7 +53,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SubredditScreen(
     onAppBarStateUpdate: (AppBarState) -> Unit,
-    onNavigateToRedditPost: (String) -> Unit,
+    onNavigateToRedditPost: (String, String) -> Unit,
     onNavigateToProfile: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SubredditViewModel = hiltViewModel()
@@ -110,7 +107,7 @@ fun SubredditScreen(
     ) {
         SubredditPosts(
             posts = subredditPosts.toImmutableList(),
-            onPostClick = { postId -> onNavigateToRedditPost(postId) },
+            onPostClick = { postId -> onNavigateToRedditPost(viewModel.subreddit, postId) },
             onLoadClick = { viewModel.showPosts() },
             modifier = Modifier
                 .fillMaxSize()
@@ -163,7 +160,7 @@ private fun ItemDrawer(
 
 @Composable
 private fun SubredditPosts(
-    posts: ImmutableList<SubredditPost>,
+    posts: ImmutableList<RedditPost>,
     onPostClick: (String) -> Unit,
     onLoadClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -198,7 +195,7 @@ private fun SubredditPosts(
 
 @Composable
 private fun SubredditPost(
-    data: SubredditPost.Data,
+    data: RedditPost.Data,
     onPostClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -222,11 +219,8 @@ private fun SubredditPost(
                 style = MaterialTheme.typography.bodyLarge
             )
             if (!data.text.isNullOrEmpty()) {
-                Text(
-                    text = AnnotatedString.fromHtml(
-                        data.text,
-                        linkStyles = TextLinkStyles(style = SpanStyle(color = MaterialTheme.colorScheme.primary))
-                    ),
+                HtmlText(
+                    text = data.text,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 4,
                     style = MaterialTheme.typography.bodySmall
