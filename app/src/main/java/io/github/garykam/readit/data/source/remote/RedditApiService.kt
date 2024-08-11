@@ -1,10 +1,11 @@
 package io.github.garykam.readit.data.source.remote
 
+import com.google.gson.GsonBuilder
 import io.github.garykam.readit.data.model.RedditListing
-import io.github.garykam.readit.data.model.RedditUser
-import io.github.garykam.readit.data.model.Subreddit
 import io.github.garykam.readit.data.model.RedditPost
 import io.github.garykam.readit.data.model.RedditPostComment
+import io.github.garykam.readit.data.model.RedditUser
+import io.github.garykam.readit.data.model.Subreddit
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -65,7 +66,11 @@ interface RedditApiService {
         fun create(): RedditApiService {
             return Retrofit.Builder()
                 .baseUrl(API_BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(
+                    GsonConverterFactory.create(
+                        GsonBuilder().registerTypeAdapterFactory(RedditPostCommentAdapterFactory()).create()
+                    )
+                )
                 .build()
                 .create(RedditApiService::class.java)
         }

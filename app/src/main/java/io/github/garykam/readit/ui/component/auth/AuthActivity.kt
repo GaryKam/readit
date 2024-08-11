@@ -43,10 +43,10 @@ class AuthActivity : ComponentActivity() {
 
                     is RedditAuthResult.Error -> {
                         Log.d("AuthActivity", authResult.errorMessage)
+                        finish()
                     }
                 }
             }
-
             return
         }
 
@@ -75,24 +75,20 @@ class AuthActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        val error = intent?.data?.getQueryParameter("error") ?: ""
-        val state = intent?.data?.getQueryParameter("state") ?: ""
-        val code = intent?.data?.getQueryParameter("code") ?: ""
+        val error = intent?.data?.getQueryParameter("error")
+        val state = intent?.data?.getQueryParameter("state")
+        val code = intent?.data?.getQueryParameter("code")
 
-        if (error.isEmpty() && state.isNotEmpty() && code.isNotEmpty()) {
-            viewModel.retrieveAccessToken(code, state).observe(this) { authResult ->
-                when (authResult) {
-                    is RedditAuthResult.Success -> {
-                        startActivity(Intent(this, MainActivity::class.java))
-                    }
+        viewModel.retrieveAccessToken(error, state, code).observe(this) { authResult ->
+            when (authResult) {
+                is RedditAuthResult.Success -> {
+                    startActivity(Intent(this, MainActivity::class.java))
+                }
 
-                    is RedditAuthResult.Error -> {
-                        Log.d("AuthActivity", authResult.errorMessage)
-                    }
+                is RedditAuthResult.Error -> {
+                    Log.d("AuthActivity", authResult.errorMessage)
                 }
             }
-        } else {
-            Log.d("AuthActivity", "Failed to authenticate: $error")
         }
     }
 }

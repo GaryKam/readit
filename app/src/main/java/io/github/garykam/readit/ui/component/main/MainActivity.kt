@@ -43,7 +43,6 @@ private fun ReadItApp() {
     var appBarState by remember { mutableStateOf(AppBarState()) }
 
     Scaffold(
-        modifier = Modifier,
         topBar = {
             TopAppBar(
                 title = appBarState.title,

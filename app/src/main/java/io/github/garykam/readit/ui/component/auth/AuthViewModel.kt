@@ -39,8 +39,13 @@ class AuthViewModel @Inject constructor(
             }
     }
 
-    fun retrieveAccessToken(code: String, state: String): LiveData<RedditAuthResult> {
+    fun retrieveAccessToken(error: String?, state: String?, code: String?): LiveData<RedditAuthResult> {
         val authResult = MutableLiveData<RedditAuthResult>()
+
+        if (!error.isNullOrEmpty() || state.isNullOrEmpty() || code.isNullOrEmpty()) {
+            authResult.value = RedditAuthResult.Error("Failed to authenticate: $error")
+            return authResult
+        }
 
         viewModelScope.launch {
             val authResponse = repository.fetchAuthResponse(code, state)
