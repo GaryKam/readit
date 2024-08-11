@@ -13,6 +13,7 @@ object PreferenceUtil {
     private const val KEY_ACCESS_TOKEN = "access_token"
     private const val KEY_REFRESH_TOKEN = "refresh_token"
     private const val KEY_TOKEN_EXPIRATION = "token_expire"
+    private const val KEY_SUBREDDIT = "subreddit"
     private const val DEFAULT_TOKEN = ""
     private const val DEFAULT_TOKEN_EXPIRATION = -1L
 
@@ -62,5 +63,13 @@ object PreferenceUtil {
 
     fun setTokenExpiration(expiresAt: Long) {
         sharedPreferences.edit().putLong(KEY_TOKEN_EXPIRATION, expiresAt).apply()
+    }
+
+    fun getSubreddit(): String {
+        return sharedPreferences.getString(KEY_SUBREDDIT, "").orEmpty()
+    }
+
+    fun setSubreddit(subreddit: String) {
+        sharedPreferences.edit().putString(KEY_SUBREDDIT, subreddit).apply()
     }
 }

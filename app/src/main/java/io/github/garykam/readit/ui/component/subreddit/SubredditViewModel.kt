@@ -10,6 +10,7 @@ import io.github.garykam.readit.data.model.RedditUser
 import io.github.garykam.readit.data.model.Subreddit
 import io.github.garykam.readit.data.model.RedditPost
 import io.github.garykam.readit.data.repository.RedditApiRepository
+import io.github.garykam.readit.util.PreferenceUtil
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -32,6 +33,11 @@ class SubredditViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            val subreddit = PreferenceUtil.getSubreddit()
+            if (subreddit.isNotEmpty()) {
+                clickSubreddit(PreferenceUtil.getSubreddit())
+            }
+
             _user.update { repository.getUser() }
             repository.getSubscribedSubreddits()?.data?.children?.let { subreddits ->
                 _subscribedSubreddits.update { subreddits }
@@ -47,6 +53,7 @@ class SubredditViewModel @Inject constructor(
         this.subreddit = subreddit
         _redditPosts.update { emptyList() }
         after = null
+        PreferenceUtil.setSubreddit(subreddit)
 
         showPosts()
     }

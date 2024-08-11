@@ -1,7 +1,6 @@
 package io.github.garykam.readit.ui.component.main
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -18,7 +17,6 @@ import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.garykam.readit.ui.navigation.ReadItNavHost
 import io.github.garykam.readit.ui.theme.ReadItTheme
-import io.github.garykam.readit.util.PreferenceUtil
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -27,8 +25,6 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
 
-
-        Log.d("test", PreferenceUtil.getAccessToken())
         setContent {
             ReadItTheme {
                 ReadItApp()
