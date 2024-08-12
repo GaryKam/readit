@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerState
@@ -36,16 +39,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import io.github.garykam.readit.R
 import io.github.garykam.readit.data.model.RedditPost
 import io.github.garykam.readit.ui.component.common.HtmlText
+import io.github.garykam.readit.ui.component.common.Pill
 import io.github.garykam.readit.ui.component.main.AppBarState
 import io.github.garykam.readit.util.toElapsed
+import io.github.garykam.readit.util.toShortened
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
@@ -76,7 +84,10 @@ fun SubredditScreen(
                             }
                         }
                     ) {
-                        Icon(imageVector = Icons.Default.Menu, contentDescription = "menu")
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "menu"
+                        )
                     }
                 },
                 actions = {
@@ -209,7 +220,7 @@ private fun SubredditPost(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             Text(
-                text = "u/${data.author} • ${data.created.toElapsed()} ago",
+                text = "u/${data.author} • ${data.created.toElapsed()}",
                 style = MaterialTheme.typography.labelMedium
             )
             Text(
@@ -225,6 +236,41 @@ private fun SubredditPost(
                     maxLines = 4,
                     style = MaterialTheme.typography.bodySmall
                 )
+            }
+
+            Row(
+                modifier = Modifier
+                    .padding(vertical = 4.dp)
+                    .fillMaxWidth()
+                    .height(intrinsicSize = IntrinsicSize.Max)
+            ) {
+                Pill(modifier = Modifier.fillMaxHeight()) {
+                    Icon(
+                        imageVector = Icons.Outlined.ThumbUp,
+                        contentDescription = null,
+                        modifier = Modifier.scale(0.7F)
+                    )
+                    Text(
+                        text = data.score.toString(),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(10.dp)
+                )
+                Pill(modifier = Modifier.fillMaxHeight()) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_chatbox),
+                        contentDescription = null,
+                        modifier = Modifier.scale(0.8F)
+                    )
+                    Text(
+                        text = data.comments.toShortened(),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
             }
         }
     }

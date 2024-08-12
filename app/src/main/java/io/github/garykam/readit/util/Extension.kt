@@ -1,5 +1,6 @@
 package io.github.garykam.readit.util
 
+import android.icu.text.DecimalFormat
 import java.time.Duration
 import java.time.Instant
 
@@ -15,5 +16,12 @@ fun Long.toElapsed(): String {
         hours > 0 -> "$hours hr."
         minutes > 0 -> "$minutes min."
         else -> { "Less than 1 min." }
+    } + " ago"
+}
+
+fun Int.toShortened(): String {
+    return when {
+        this < 1000 -> this.toString()
+        else -> DecimalFormat("#.#K").format(this / 1000.0)
     }
 }
