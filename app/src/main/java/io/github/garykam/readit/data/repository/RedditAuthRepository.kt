@@ -67,7 +67,7 @@ class RedditAuthRepository @Inject constructor(
     }
 
     companion object {
-        private const val AUTH_URL = "https://www.reddit.com/api/v1/authorize?client_id=%s&response_type=code&state=%s&redirect_uri=%s&duration=%s&scope=%s"
+        private const val AUTH_URL = "https://www.reddit.com/api/v1/authorize.compact?client_id=%s&response_type=code&state=%s&redirect_uri=%s&duration=%s&scope=%s"
         private const val CLIENT_ID = "2tTU7W_Ode727mcjbyMgKw"
         private const val REDIRECT_URI = "readit://auth"
         private const val DURATION = "permanent"

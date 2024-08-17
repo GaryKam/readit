@@ -8,11 +8,14 @@ data class RedditPostComment(
     val data: Data
 ) {
     data class Data(
+        val author: String,
         val title: String,
         @SerializedName("selftext_html")
         val header: String?,
         @SerializedName("body_html")
         val text: String?,
+        val score: Int,
+        val created: Long,
         @JsonAdapter(RedditPostCommentAdapterFactory::class)
         val replies: RedditListing<RedditPostComment>?
     )

@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            ReadItTheme {
+            ReadItTheme(darkTheme = false) {
                 ReadItApp()
             }
         }
