@@ -8,6 +8,8 @@ data class RedditPostComment(
     val data: Data
 ) {
     data class Data(
+        @SerializedName("name")
+        val id: String,
         val author: String,
         val title: String,
         @SerializedName("selftext_html")

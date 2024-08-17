@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Button
@@ -41,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -51,6 +53,7 @@ import io.github.garykam.readit.R
 import io.github.garykam.readit.data.model.RedditPost
 import io.github.garykam.readit.ui.component.common.HtmlText
 import io.github.garykam.readit.ui.component.common.Pill
+import io.github.garykam.readit.ui.component.common.SearchBar
 import io.github.garykam.readit.ui.component.main.AppBarState
 import io.github.garykam.readit.util.toElapsed
 import io.github.garykam.readit.util.toShortened
@@ -66,16 +69,39 @@ fun SubredditScreen(
     modifier: Modifier = Modifier,
     viewModel: SubredditViewModel = hiltViewModel()
 ) {
+    val focusManager = LocalFocusManager.current
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val user by viewModel.user.collectAsState()
-    val subreddits by viewModel.subscribedSubreddits.collectAsState()
-    val subredditPosts by viewModel.subredditPosts.collectAsState()
+    val subscribedSubreddits by viewModel.subscribedSubreddits.collectAsState()
+    val redditPosts by viewModel.redditPosts.collectAsState()
+    val activeSubreddit by viewModel.activeSubreddit.collectAsState()
+    val subredditSearch by viewModel.subredditSearch.collectAsState()
 
     LaunchedEffect(key1 = true) {
         onAppBarStateUpdate(
             AppBarState(
-                title = { Text(text = viewModel.subreddit) },
+                title = {
+                    SearchBar(
+                        query = subredditSearch,
+                        onQueryChange = { viewModel.changeSearch(it) },
+                        onSearch = {
+                            focusManager.clearFocus()
+                            viewModel.selectSubreddit(it)
+                        },
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                focusManager.clearFocus()
+                                viewModel.changeSearch(activeSubreddit)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = "cancel search"
+                                )
+                            }
+                        }
+                    )
+                },
                 navigationIcon = {
                     IconButton(
                         onClick = {
@@ -107,19 +133,19 @@ fun SubredditScreen(
     }
 
     ItemDrawer(
-        items = subreddits.map { it.data.prefixedName }.toImmutableList(),
-        selectedItem = viewModel.subreddit,
+        items = subscribedSubreddits.map { it.data.prefixedName }.toImmutableList(),
+        selectedItem = activeSubreddit,
         drawerState = drawerState,
         onItemClick = {
-            viewModel.clickSubreddit(it)
+            viewModel.selectSubreddit(it)
             scope.launch { drawerState.close() }
         },
         modifier = modifier
     ) {
-        SubredditPosts(
-            posts = subredditPosts.toImmutableList(),
-            onPostClick = { postId -> onNavigateToRedditPost(viewModel.subreddit, postId) },
-            onLoadClick = { viewModel.showPosts() },
+        RedditPosts(
+            posts = redditPosts.toImmutableList(),
+            onPostClick = { postId -> onNavigateToRedditPost(activeSubreddit, postId) },
+            onLoadClick = { viewModel.loadPosts() },
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
@@ -155,8 +181,10 @@ private fun ItemDrawer(
                             )
                         }
                     ) {
-                        Text(text = item)
-                        Spacer(modifier = Modifier.fillMaxWidth())
+                        Text(
+                            text = item,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }
@@ -170,7 +198,7 @@ private fun ItemDrawer(
 }
 
 @Composable
-private fun SubredditPosts(
+private fun RedditPosts(
     posts: ImmutableList<RedditPost>,
     onPostClick: (String) -> Unit,
     onLoadClick: () -> Unit,
@@ -181,8 +209,11 @@ private fun SubredditPosts(
         contentPadding = PaddingValues(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(posts) { post ->
-            SubredditPost(
+        items(
+            items = posts,
+            key = { it.data.id }
+        ) { post ->
+            RedditPost(
                 data = post.data,
                 onPostClick = onPostClick,
                 modifier = Modifier.fillMaxWidth()
@@ -205,7 +236,7 @@ private fun SubredditPosts(
 }
 
 @Composable
-private fun SubredditPost(
+private fun RedditPost(
     data: RedditPost.Data,
     onPostClick: (String) -> Unit,
     modifier: Modifier = Modifier

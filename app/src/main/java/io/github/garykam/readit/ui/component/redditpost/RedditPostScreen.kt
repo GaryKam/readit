@@ -113,7 +113,10 @@ fun RedditPostScreen(
         }
 
         val startPadding = 16.dp
-        items(items = comments.subList(0, comments.size)) { comment ->
+        items(
+            items = comments.subList(0, comments.size),
+            key = { it.data.id }
+        ) { comment ->
             // Individual reply to the main content
             if (comment.data.text != null) {
                 Comment(
@@ -146,7 +149,7 @@ private fun Comment(
             )
         }
         HtmlText(
-            text = data.text!!,
+            text = data.text ?: "",
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.bodySmall
         )

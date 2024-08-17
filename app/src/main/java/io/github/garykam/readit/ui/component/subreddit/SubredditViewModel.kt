@@ -1,8 +1,5 @@
 package io.github.garykam.readit.ui.component.subreddit
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,22 +19,26 @@ class SubredditViewModel @Inject constructor(
     private val repository: RedditApiRepository
 ) : ViewModel() {
     private val _user = MutableStateFlow<RedditUser?>(null)
-    val user = _user.asStateFlow()
     private val _subscribedSubreddits = MutableStateFlow<List<Subreddit>>(emptyList())
-    val subscribedSubreddits = _subscribedSubreddits.asStateFlow()
     private val _redditPosts = MutableStateFlow<List<RedditPost>>(emptyList())
-    val subredditPosts = _redditPosts.asStateFlow()
-    var subreddit by mutableStateOf("")
-        private set
+    private val _activeSubreddit = MutableStateFlow("")
+    private val _subredditSearch = MutableStateFlow("")
     private var after: String? = null
+    val user = _user.asStateFlow()
+    val subscribedSubreddits = _subscribedSubreddits.asStateFlow()
+    val redditPosts = _redditPosts.asStateFlow()
+    val activeSubreddit = _activeSubreddit.asStateFlow()
+    val subredditSearch = _subredditSearch.asStateFlow()
 
     init {
         viewModelScope.launch {
             val subreddit = PreferenceUtil.getSubreddit()
             if (subreddit.isNotEmpty()) {
-                clickSubreddit(PreferenceUtil.getSubreddit())
+                selectSubreddit(subreddit)
             }
 
+            _activeSubreddit.update { subreddit }
+            _subredditSearch.update { subreddit }
             _user.update { repository.getUser() }
             repository.getSubscribedSubreddits()?.data?.children?.let { subreddits ->
                 _subscribedSubreddits.update { subreddits }
@@ -45,21 +46,27 @@ class SubredditViewModel @Inject constructor(
         }
     }
 
-    fun clickSubreddit(subreddit: String) {
-        if (this.subreddit == subreddit) {
+    fun changeSearch(subreddit: String) {
+        _subredditSearch.update { subreddit }
+    }
+
+    fun selectSubreddit(subreddit: String) {
+        if (activeSubreddit.value == subreddit) {
             return
         }
 
-        this.subreddit = subreddit
+        _activeSubreddit.update { subreddit }
+        _subredditSearch.update { subreddit }
         _redditPosts.update { emptyList() }
         after = null
         PreferenceUtil.setSubreddit(subreddit)
 
-        showPosts()
+        loadPosts()
     }
 
-    fun showPosts() {
+    fun loadPosts() {
         viewModelScope.launch {
+            val subreddit = activeSubreddit.value
             val subredditPosts = if (subreddit.startsWith("r/")) {
                 repository.getPostsFromSubreddit(subreddit.removePrefix("r/"), after = after)
             } else if (subreddit.startsWith("u/")) {
