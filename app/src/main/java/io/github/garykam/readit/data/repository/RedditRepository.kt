@@ -12,7 +12,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RedditApiRepository @Inject constructor(
+class RedditRepository @Inject constructor(
     private val api: RedditApiService
 ) {
     private val accessToken: String
@@ -28,8 +28,8 @@ class RedditApiRepository @Inject constructor(
 
     suspend fun getPostsFromSubreddit(
         subreddit: String,
-        order: String = "new",
-        after: String? = null
+        order: String,
+        after: String?,
     ): RedditListing<RedditPost>? {
         return api.getSubredditPostsListing(accessToken, subreddit, order, after).awaitResponse().body()
     }

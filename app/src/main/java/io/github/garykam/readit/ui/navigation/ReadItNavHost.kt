@@ -24,7 +24,7 @@ fun ReadItNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     startDestination: Destination = Subreddit,
-    subredditViewModel: SubredditViewModel = hiltViewModel(),
+    subredditViewModel: SubredditViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
 

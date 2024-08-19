@@ -20,16 +20,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
@@ -51,7 +49,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import io.github.garykam.readit.R
 import io.github.garykam.readit.data.model.RedditPost
+import io.github.garykam.readit.ui.component.common.DropdownButton
 import io.github.garykam.readit.ui.component.common.HtmlText
+import io.github.garykam.readit.ui.component.common.ItemDrawer
 import io.github.garykam.readit.ui.component.common.Pill
 import io.github.garykam.readit.ui.component.common.SearchBar
 import io.github.garykam.readit.ui.component.main.AppBarState
@@ -77,6 +77,8 @@ fun SubredditScreen(
     val redditPosts by viewModel.redditPosts.collectAsState()
     val activeSubreddit by viewModel.activeSubreddit.collectAsState()
     val subredditSearch by viewModel.subredditSearch.collectAsState()
+    val postOrder by viewModel.postOrder.collectAsState()
+    val after by viewModel.after.collectAsState()
 
     LaunchedEffect(key1 = true) {
         onAppBarStateUpdate(
@@ -89,11 +91,19 @@ fun SubredditScreen(
                             focusManager.clearFocus()
                             viewModel.selectSubreddit(it)
                         },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = null
+                            )
+                        },
                         trailingIcon = {
-                            IconButton(onClick = {
-                                focusManager.clearFocus()
-                                viewModel.changeSearch(activeSubreddit)
-                            }) {
+                            IconButton(
+                                onClick = {
+                                    focusManager.clearFocus()
+                                    viewModel.changeSearch(activeSubreddit)
+                                }
+                            ) {
                                 Icon(
                                     imageVector = Icons.Default.Clear,
                                     contentDescription = "cancel search"
@@ -133,7 +143,9 @@ fun SubredditScreen(
     }
 
     ItemDrawer(
-        items = subscribedSubreddits.map { it.data.prefixedName }.toImmutableList(),
+        items = subscribedSubreddits
+            .map { it.data.prefixedName }
+            .toImmutableList(),
         selectedItem = activeSubreddit,
         drawerState = drawerState,
         onItemClick = {
@@ -142,7 +154,14 @@ fun SubredditScreen(
         },
         modifier = modifier
     ) {
+        DropdownButton(
+            items = viewModel.orderList.toImmutableList(),
+            selectedItem = postOrder,
+            onItemClick = { viewModel.orderPosts(it) },
+            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onBackground)
+        )
         RedditPosts(
+            canLoadMore = after != null,
             posts = redditPosts.toImmutableList(),
             onPostClick = { postId -> onNavigateToRedditPost(activeSubreddit, postId) },
             onLoadClick = { viewModel.loadPosts() },
@@ -154,51 +173,8 @@ fun SubredditScreen(
 }
 
 @Composable
-private fun ItemDrawer(
-    items: ImmutableList<String>,
-    selectedItem: String,
-    drawerState: DrawerState,
-    onItemClick: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    ModalNavigationDrawer(
-        drawerContent = {
-            ModalDrawerSheet(modifier = Modifier.width(IntrinsicSize.Max)) {
-                for (item in items) {
-                    Button(
-                        onClick = { onItemClick(item) },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = if (item == selectedItem) {
-                            ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.background
-                            )
-                        } else {
-                            ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.background,
-                                contentColor = MaterialTheme.colorScheme.onBackground
-                            )
-                        }
-                    ) {
-                        Text(
-                            text = item,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
-            }
-        },
-        modifier = modifier,
-        drawerState = drawerState,
-        gesturesEnabled = false
-    ) {
-        content()
-    }
-}
-
-@Composable
 private fun RedditPosts(
+    canLoadMore: Boolean,
     posts: ImmutableList<RedditPost>,
     onPostClick: (String) -> Unit,
     onLoadClick: () -> Unit,
@@ -209,6 +185,12 @@ private fun RedditPosts(
         contentPadding = PaddingValues(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        item {
+            Row(modifier = Modifier.fillMaxWidth()) {
+
+            }
+        }
+
         items(
             items = posts,
             key = { it.data.id }
@@ -220,7 +202,7 @@ private fun RedditPosts(
             )
         }
 
-        if (posts.isNotEmpty()) {
+        if (canLoadMore) {
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
