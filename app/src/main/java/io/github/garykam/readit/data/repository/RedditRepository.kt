@@ -28,10 +28,11 @@ class RedditRepository @Inject constructor(
 
     suspend fun getPostsFromSubreddit(
         subreddit: String,
-        order: String,
+        postOrder: String,
+        topPostOrder: String?,
         after: String?,
     ): RedditListing<RedditPost>? {
-        return api.getSubredditPostsListing(accessToken, subreddit, order, after).awaitResponse().body()
+        return api.getSubredditPostsListing(accessToken, subreddit, postOrder, topPostOrder, after).awaitResponse().body()
     }
 
     suspend fun getPostsFromUserProfile(

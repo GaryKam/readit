@@ -78,6 +78,7 @@ fun SubredditScreen(
     val activeSubreddit by viewModel.activeSubreddit.collectAsState()
     val subredditSearch by viewModel.subredditSearch.collectAsState()
     val postOrder by viewModel.postOrder.collectAsState()
+    val topPostOrder by viewModel.topPostOrder.collectAsState()
     val after by viewModel.after.collectAsState()
 
     LaunchedEffect(key1 = true) {
@@ -154,11 +155,13 @@ fun SubredditScreen(
         },
         modifier = modifier
     ) {
-        DropdownButton(
-            items = viewModel.orderList.toImmutableList(),
-            selectedItem = postOrder,
-            onItemClick = { viewModel.orderPosts(it) },
-            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onBackground)
+        PostOrderButtons(
+            orderItems = viewModel.orderList.toImmutableList(),
+            topOrderItems = viewModel.topOrderMap.keys.toImmutableList(),
+            selectedOrder = postOrder,
+            selectedTopOrder = topPostOrder,
+            onOrderClick = { viewModel.orderPosts(it) },
+            onTopOrderClick = { viewModel.orderPosts(postOrder, it) }
         )
         RedditPosts(
             canLoadMore = after != null,
@@ -169,6 +172,34 @@ fun SubredditScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         )
+    }
+}
+
+@Composable
+private fun PostOrderButtons(
+    orderItems: ImmutableList<String>,
+    topOrderItems: ImmutableList<String>,
+    selectedOrder: String,
+    selectedTopOrder: String,
+    onOrderClick: (String) -> Unit,
+    onTopOrderClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(modifier = modifier) {
+        DropdownButton(
+            items = orderItems,
+            selectedItem = selectedOrder,
+            onItemClick = { onOrderClick(it) },
+            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onBackground)
+        )
+        if (selectedOrder == orderItems[2]) {
+            DropdownButton(
+                items = topOrderItems,
+                selectedItem = selectedTopOrder,
+                onItemClick = { onTopOrderClick(it) },
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onBackground)
+            )
+        }
     }
 }
 

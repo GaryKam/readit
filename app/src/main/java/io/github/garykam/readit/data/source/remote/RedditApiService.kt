@@ -36,6 +36,7 @@ interface RedditApiService {
         @Header("Authorization") bearer: String,
         @Path("subreddit") subreddit: String,
         @Path("order") order: String,
+        @Query("t") topOrder: String?,
         @Query("after") after: String?,
         @Query("raw_json") rawJson: Int = 1
     ): Call<RedditListing<RedditPost>>

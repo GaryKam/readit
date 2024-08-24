@@ -24,6 +24,7 @@ class SubredditViewModel @Inject constructor(
     private val _activeSubreddit = MutableStateFlow("")
     private val _subredditSearch = MutableStateFlow("")
     private val _postOrder = MutableStateFlow("")
+    private val _topPostOrder = MutableStateFlow("")
     private var _after = MutableStateFlow<String?>(null)
     val user = _user.asStateFlow()
     val subscribedSubreddits = _subscribedSubreddits.asStateFlow()
@@ -31,8 +32,13 @@ class SubredditViewModel @Inject constructor(
     val activeSubreddit = _activeSubreddit.asStateFlow()
     val subredditSearch = _subredditSearch.asStateFlow()
     val postOrder = _postOrder.asStateFlow()
+    val topPostOrder = _topPostOrder.asStateFlow()
     val after = _after.asStateFlow()
     val orderList = listOf("HOT", "NEW", "TOP", "RISING")
+    val topOrderMap = mapOf(
+        "NOW" to "hour", "TODAY" to "day", "THIS WEEK" to "week",
+        "THIS MONTH" to "month", "THIS YEAR" to "year", "ALL TIME" to "all"
+    )
 
     init {
         viewModelScope.launch {
@@ -57,32 +63,47 @@ class SubredditViewModel @Inject constructor(
         _activeSubreddit.update { subreddit }
         _subredditSearch.update { subreddit }
         _postOrder.update { PreferenceUtil.getPostOrder(subreddit).ifEmpty { orderList[0] } }
+        _topPostOrder.update { topOrderMap.keys.elementAt(1) }
         _after.update { null }
 
         loadPosts()
         PreferenceUtil.setSubreddit(subreddit)
     }
 
-    fun orderPosts(order: String) {
+    fun orderPosts(
+        order: String,
+        topPostOrder: String = topOrderMap.keys.elementAt(1)
+    ) {
         if (_activeSubreddit.value.isNotEmpty()) {
             _redditPosts.update { emptyList() }
             _postOrder.update { order }
+            _topPostOrder.update { topPostOrder }
             _after.update { null }
 
             loadPosts()
-            PreferenceUtil.setPostOrder(_activeSubreddit.value.lowercase(), order)
+            PreferenceUtil.setPostOrder(_activeSubreddit.value, order)
         }
     }
 
     fun loadPosts() {
         viewModelScope.launch {
             val subreddit = _activeSubreddit.value
-            val subredditPosts = if (subreddit.startsWith("r/")) {
-                repository.getPostsFromSubreddit(subreddit.removePrefix("r/"), _postOrder.value.lowercase(), _after.value)
-            } else if (subreddit.startsWith("u/")) {
-                repository.getPostsFromUserProfile(subreddit.removePrefix("u/"), after = _after.value)
-            } else {
-                null
+            val subredditPosts = when {
+                subreddit.startsWith(SUBREDDIT_PREFIX) ->
+                    repository.getPostsFromSubreddit(
+                        subreddit.removePrefix(SUBREDDIT_PREFIX),
+                        _postOrder.value.lowercase(),
+                        if (_postOrder.value == orderList[2]) topOrderMap[_topPostOrder.value] else null,
+                        _after.value
+                    )
+
+                subreddit.startsWith(USER_PROFILE_PREFIX) ->
+                    repository.getPostsFromUserProfile(
+                        subreddit.removePrefix(USER_PROFILE_PREFIX),
+                        after = _after.value
+                    )
+
+                else -> null
             }
 
             subredditPosts?.data?.let { data ->
@@ -90,5 +111,10 @@ class SubredditViewModel @Inject constructor(
                 _after.update { data.after }
             }
         }
+    }
+
+    companion object {
+        private const val SUBREDDIT_PREFIX = "r/"
+        private const val USER_PROFILE_PREFIX = "u/"
     }
 }
