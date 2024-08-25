@@ -20,7 +20,8 @@ data class RedditPost(
         @SerializedName("gallery_data")
         val galleryData: GalleryData?,
         @SerializedName("media_metadata")
-        val mediaMetadata: Map<String, MediaMetadata>?
+        val mediaMetadata: Map<String, MediaMetadata>?,
+        val thumbnail: String?
     )
 
     val hasImage: Boolean
@@ -28,6 +29,12 @@ data class RedditPost(
 
     val hasGallery: Boolean
         get() = data.galleryData != null && data.mediaMetadata != null
+
+    val hasThumbnail: Boolean
+        get() = data.thumbnail?.endsWith(".jpg") ?: false
+
+    val isLink: Boolean
+        get() = data.text.isNullOrEmpty() && !data.url.isNullOrEmpty()
 }
 
 data class GalleryData(

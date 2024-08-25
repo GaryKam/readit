@@ -54,7 +54,7 @@ fun ItemDrawer(
         },
         modifier = modifier,
         drawerState = drawerState,
-        gesturesEnabled = true
+        gesturesEnabled = drawerState.isOpen
     ) {
         Column {
             content()

@@ -1,5 +1,6 @@
 package io.github.garykam.readit.ui.component.subreddit
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Menu
@@ -36,17 +38,24 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import io.github.garykam.readit.R
 import io.github.garykam.readit.data.model.RedditPost
 import io.github.garykam.readit.ui.component.common.DropdownButton
@@ -276,7 +285,9 @@ private fun RedditPost(
                     AsyncImage(
                         model = data.url,
                         contentDescription = "post image",
-                        modifier = Modifier.clickable(false) {}
+                        modifier = Modifier
+                            .padding(vertical = 4.dp)
+                            .clickable(false) {}
                     )
                 }
 
@@ -288,7 +299,54 @@ private fun RedditPost(
                     )
                 }
 
-                !data.text.isNullOrEmpty() -> {
+                post.hasThumbnail -> {
+                    Row(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = buildAnnotatedString {
+                                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                                    append(data.url)
+                                }
+                                addLink(LinkAnnotation.Url(data.url!!), 0, data.url.length)
+                            },
+                            modifier = Modifier.weight(0.7f),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(data.thumbnail)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = "thumbnail image",
+                            modifier = Modifier
+                                .weight(0.2f)
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+
+                post.isLink -> {
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                                append(data.url)
+                            }
+                            addLink(LinkAnnotation.Url(data.url!!), 0, data.url.length)
+                        },
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 4,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                data.text != null -> {
                     HtmlText(
                         text = data.text,
                         modifier = Modifier.padding(horizontal = 16.dp),

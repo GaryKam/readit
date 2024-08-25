@@ -18,12 +18,13 @@ fun HtmlText(
     modifier: Modifier = Modifier,
     overflow: TextOverflow = TextOverflow.Clip,
     maxLines: Int = Int.MAX_VALUE,
-    style: TextStyle = LocalTextStyle.current
+    style: TextStyle = LocalTextStyle.current,
+    linkStyles: TextLinkStyles = TextLinkStyles(style = SpanStyle(color = MaterialTheme.colorScheme.primary))
 ) {
     Text(
         text = AnnotatedString.fromHtml(
             text,
-            linkStyles = TextLinkStyles(style = SpanStyle(color = MaterialTheme.colorScheme.primary))
+            linkStyles = linkStyles
         ),
         modifier = modifier,
         overflow = overflow,
