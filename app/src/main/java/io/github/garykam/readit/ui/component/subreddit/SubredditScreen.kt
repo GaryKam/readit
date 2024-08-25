@@ -50,6 +50,7 @@ import coil.compose.AsyncImage
 import io.github.garykam.readit.R
 import io.github.garykam.readit.data.model.RedditPost
 import io.github.garykam.readit.ui.component.common.DropdownButton
+import io.github.garykam.readit.ui.component.common.Gallery
 import io.github.garykam.readit.ui.component.common.HtmlText
 import io.github.garykam.readit.ui.component.common.ItemDrawer
 import io.github.garykam.readit.ui.component.common.Pill
@@ -59,6 +60,7 @@ import io.github.garykam.readit.util.toElapsed
 import io.github.garykam.readit.util.toShortened
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.launch
 
 @Composable
@@ -220,7 +222,7 @@ private fun RedditPosts(
             key = { it.data.id }
         ) { post ->
             RedditPost(
-                data = post.data,
+                post = post,
                 onPostClick = onPostClick,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -243,10 +245,12 @@ private fun RedditPosts(
 
 @Composable
 private fun RedditPost(
-    data: RedditPost.Data,
+    post: RedditPost,
     onPostClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val data = post.data
+
     Surface(
         modifier = modifier,
         shadowElevation = 8.dp
@@ -267,21 +271,33 @@ private fun RedditPost(
                 fontWeight = FontWeight.SemiBold,
                 style = MaterialTheme.typography.bodyLarge
             )
-            if (data.hasImages) {
-                AsyncImage(
-                    model = data.url,
-                    contentDescription = "content"
-                )
-            } else if (!data.text.isNullOrEmpty()) {
-                HtmlText(
-                    text = data.text,
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 4,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
+            when {
+                post.hasImage -> {
+                    AsyncImage(
+                        model = data.url,
+                        contentDescription = "post image",
+                        modifier = Modifier.clickable(false) {}
+                    )
+                }
 
+                post.hasGallery -> {
+                    Gallery(
+                        galleryData = data.galleryData!!,
+                        mediaMetadata = data.mediaMetadata!!.toImmutableMap(),
+                        modifier = Modifier.height(300.dp)
+                    )
+                }
+
+                !data.text.isNullOrEmpty() -> {
+                    HtmlText(
+                        text = data.text,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 4,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
             Row(
                 modifier = Modifier
                     .padding(horizontal = 16.dp, vertical = 4.dp)

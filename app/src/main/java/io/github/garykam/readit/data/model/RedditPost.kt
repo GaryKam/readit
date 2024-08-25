@@ -16,9 +16,38 @@ data class RedditPost(
         val score: Int,
         val created: Long,
         @SerializedName("num_comments")
-        val comments: Int
-    ) {
-        val hasImages: Boolean
-            get() = url?.endsWith(".jpeg") ?: false
-    }
+        val comments: Int,
+        @SerializedName("gallery_data")
+        val galleryData: GalleryData?,
+        @SerializedName("media_metadata")
+        val mediaMetadata: Map<String, MediaMetadata>?
+    )
+
+    val hasImage: Boolean
+        get() = data.url?.endsWith(".jpeg") ?: false
+
+    val hasGallery: Boolean
+        get() = data.galleryData != null && data.mediaMetadata != null
+}
+
+data class GalleryData(
+    val items: List<Data>
+) {
+    data class Data(
+        @SerializedName("media_id")
+        val mediaId: String
+    )
+}
+
+data class MediaMetadata(
+    val status: String,
+    @SerializedName("s")
+    val data: Data
+) {
+    data class Data(
+        val x: Int,
+        val y: Int,
+        @SerializedName("u")
+        val image: String
+    )
 }
