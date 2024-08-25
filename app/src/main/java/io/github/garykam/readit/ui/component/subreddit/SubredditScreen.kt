@@ -79,7 +79,6 @@ fun SubredditScreen(
     val subredditSearch by viewModel.subredditSearch.collectAsState()
     val postOrder by viewModel.postOrder.collectAsState()
     val topPostOrder by viewModel.topPostOrder.collectAsState()
-    val after by viewModel.after.collectAsState()
 
     LaunchedEffect(key1 = true) {
         onAppBarStateUpdate(
@@ -164,7 +163,7 @@ fun SubredditScreen(
             onTopOrderClick = { viewModel.orderPosts(postOrder, it) }
         )
         RedditPosts(
-            canLoadMore = after != null,
+            canLoadMore = viewModel.canLoadMore,
             posts = redditPosts.toImmutableList(),
             onPostClick = { postId -> onNavigateToRedditPost(activeSubreddit, postId) },
             onLoadClick = { viewModel.loadPosts() },
@@ -216,12 +215,6 @@ private fun RedditPosts(
         contentPadding = PaddingValues(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        item {
-            Row(modifier = Modifier.fillMaxWidth()) {
-
-            }
-        }
-
         items(
             items = posts,
             key = { it.data.id }
@@ -261,21 +254,28 @@ private fun RedditPost(
         Column(
             modifier = Modifier
                 .clickable { onPostClick(data.id) }
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(vertical = 8.dp)
         ) {
             Text(
                 text = "u/${data.author} • ${data.created.toElapsed()}",
+                modifier = Modifier.padding(horizontal = 16.dp),
                 style = MaterialTheme.typography.labelMedium
             )
             Text(
                 text = data.title.removeSuffix("\n"),
-                modifier = Modifier.padding(vertical = 4.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                 fontWeight = FontWeight.SemiBold,
                 style = MaterialTheme.typography.bodyLarge
             )
-            if (!data.text.isNullOrEmpty()) {
+            if (data.hasImages) {
+                AsyncImage(
+                    model = data.url,
+                    contentDescription = "content"
+                )
+            } else if (!data.text.isNullOrEmpty()) {
                 HtmlText(
                     text = data.text,
+                    modifier = Modifier.padding(horizontal = 16.dp),
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 4,
                     style = MaterialTheme.typography.bodySmall
@@ -284,7 +284,7 @@ private fun RedditPost(
 
             Row(
                 modifier = Modifier
-                    .padding(vertical = 4.dp)
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
                     .fillMaxWidth()
                     .height(intrinsicSize = IntrinsicSize.Max)
             ) {

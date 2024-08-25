@@ -33,12 +33,13 @@ class SubredditViewModel @Inject constructor(
     val subredditSearch = _subredditSearch.asStateFlow()
     val postOrder = _postOrder.asStateFlow()
     val topPostOrder = _topPostOrder.asStateFlow()
-    val after = _after.asStateFlow()
     val orderList = listOf("HOT", "NEW", "TOP", "RISING")
     val topOrderMap = mapOf(
         "NOW" to "hour", "TODAY" to "day", "THIS WEEK" to "week",
         "THIS MONTH" to "month", "THIS YEAR" to "year", "ALL TIME" to "all"
     )
+    val canLoadMore: Boolean
+        get() = _after.value != null
 
     init {
         viewModelScope.launch {

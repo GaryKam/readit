@@ -69,7 +69,6 @@ dependencies {
     implementation(libs.androidx.material3)
 
     // Coil
-    //implementation(libs.coil)
     implementation(libs.coil.compose)
 
     // Custom Tabs

@@ -12,9 +12,13 @@ data class RedditPost(
         val title: String,
         @SerializedName("selftext_html")
         val text: String?,
+        val url: String?,
         val score: Int,
         val created: Long,
         @SerializedName("num_comments")
         val comments: Int
-    )
+    ) {
+        val hasImages: Boolean
+            get() = url?.endsWith(".jpeg") ?: false
+    }
 }

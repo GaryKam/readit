@@ -30,6 +30,8 @@ class AuthActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
 
+        PreferenceUtil.init(applicationContext)
+
         enableEdgeToEdge()
 
         if (PreferenceUtil.isTokenExpired()) {
