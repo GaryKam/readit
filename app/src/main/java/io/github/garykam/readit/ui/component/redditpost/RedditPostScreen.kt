@@ -2,13 +2,21 @@ package io.github.garykam.readit.ui.component.redditpost
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.ThumbUp
@@ -23,15 +31,31 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import io.github.garykam.readit.R
 import io.github.garykam.readit.data.model.RedditListing
 import io.github.garykam.readit.data.model.RedditPostComment
+import io.github.garykam.readit.ui.component.common.Gallery
 import io.github.garykam.readit.ui.component.common.HtmlText
+import io.github.garykam.readit.ui.component.common.MediaPlayer
+import io.github.garykam.readit.ui.component.common.Pill
 import io.github.garykam.readit.ui.component.main.AppBarState
 import io.github.garykam.readit.util.toElapsed
+import io.github.garykam.readit.util.toShortened
+import kotlinx.collections.immutable.toImmutableMap
 
 @Composable
 fun RedditPostScreen(
@@ -68,47 +92,9 @@ fun RedditPostScreen(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         // Main content of the reddit post
-        comments.firstOrNull()?.data?.let {
+        comments.firstOrNull()?.let {
             item {
-                Surface(shadowElevation = 8.dp) {
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .fillMaxWidth()
-                    ) {
-                        Row {
-                            Text(
-                                text = "u/${it.author} • ${it.created.toElapsed()}",
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                        }
-                        Text(
-                            text = it.title,
-                            modifier = Modifier.padding(bottom = 20.dp),
-                            style = MaterialTheme.typography.headlineSmall
-                        )
-                        it.header?.let {
-                            HtmlText(
-                                text = it,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
-                        Row(
-                            modifier = Modifier.offset(y = -(15.dp)),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.ThumbUp,
-                                contentDescription = null,
-                                modifier = Modifier.scale(0.7F)
-                            )
-                            Text(
-                                text = it.score.toString(),
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                        }
-                    }
-                }
+                Content(post = it.data)
             }
         }
 
@@ -116,18 +102,19 @@ fun RedditPostScreen(
         items(
             items = comments.subList(0, comments.size),
             key = { it.data.id }
-        ) { comment ->
+        ) {
+            val comment = it.data
             // Individual reply to the main content
-            if (comment.data.text != null) {
+            if (comment.text != null) {
                 Comment(
-                    data = comment.data,
+                    comment = comment,
                     modifier = Modifier.padding(start = startPadding, top = 2.dp, end = 16.dp, bottom = 2.dp)
                 )
 
                 // Nested replies to the individual reply
-                comment.data.replies?.let {
+                comment.replies?.let { replies ->
                     CommentReplies(
-                        replies = it,
+                        replies = replies,
                         padding = startPadding + 8.dp
                     )
                 }
@@ -137,22 +124,148 @@ fun RedditPostScreen(
 }
 
 @Composable
+private fun Content(post: RedditPostComment.Data) {
+    Surface(shadowElevation = 8.dp) {
+        Column(
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
+        ) {
+            Row {
+                Text(
+                    text = "u/${post.author} • ${post.created.toElapsed()}",
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+            Text(
+                text = post.title,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                style = MaterialTheme.typography.headlineSmall
+            )
+            post.header?.let { text ->
+                HtmlText(
+                    text = text,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+            when {
+                post.hasImage -> {
+                    AsyncImage(
+                        model = post.url,
+                        contentDescription = "post image",
+                        modifier = Modifier
+                            .sizeIn(maxHeight = 500.dp)
+                            .align(Alignment.CenterHorizontally)
+                            .padding(bottom = 4.dp)
+                    )
+                }
+
+                post.hasGallery -> {
+                    Gallery(
+                        galleryData = post.galleryData!!,
+                        mediaMetadata = post.mediaMetadata!!.toImmutableMap(),
+                        modifier = Modifier
+                            .heightIn(max = 500.dp)
+                            .padding(bottom = 4.dp)
+                    )
+                }
+
+                post.hasThumbnail -> {
+                    Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(post.thumbnail)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = "thumbnail image",
+                            modifier = Modifier
+                                .sizeIn(minWidth = 300.dp, minHeight = 300.dp)
+                                .align(Alignment.CenterHorizontally)
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Fit
+                        )
+                        Text(
+                            text = buildAnnotatedString {
+                                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                                    append(post.domain)
+                                }
+                                addLink(LinkAnnotation.Url(post.url!!), 0, post.domain!!.length)
+                            },
+                            modifier = Modifier.padding(vertical = 4.dp),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+
+                post.hasVideo -> {
+                    MediaPlayer(
+                        url = post.videoData!!.data.dashUrl,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .sizeIn(maxHeight = 300.dp)
+                            .padding(bottom = 4.dp)
+                    )
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .fillMaxWidth()
+                    .height(intrinsicSize = IntrinsicSize.Max)
+            ) {
+                Pill(modifier = Modifier.fillMaxHeight()) {
+                    Icon(
+                        imageVector = Icons.Outlined.ThumbUp,
+                        contentDescription = null,
+                        modifier = Modifier.scale(0.7F)
+                    )
+                    Text(
+                        text = post.score.toString(),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(10.dp)
+                )
+                Pill(modifier = Modifier.fillMaxHeight()) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_chatbox),
+                        contentDescription = null,
+                        modifier = Modifier.scale(0.8F)
+                    )
+                    Text(
+                        text = post.comments.toShortened(),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun Comment(
-    data: RedditPostComment.Data,
+    comment: RedditPostComment.Data,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
         Row {
             Text(
-                text = "u/${data.author} • ${data.created.toElapsed()}",
+                text = "u/${comment.author} • ${comment.created.toElapsed()}",
                 style = MaterialTheme.typography.labelSmall
             )
         }
-        HtmlText(
-            text = data.text ?: "",
-            modifier = Modifier.fillMaxWidth(),
-            style = MaterialTheme.typography.bodySmall
-        )
+        comment.text?.let {
+            HtmlText(
+                text = it,
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
         Row(
             modifier = Modifier.offset(y = -(15.dp)),
             verticalAlignment = Alignment.CenterVertically
@@ -163,7 +276,7 @@ private fun Comment(
                 modifier = Modifier.scale(0.7F)
             )
             Text(
-                text = data.score.toString(),
+                text = comment.score.toString(),
                 style = MaterialTheme.typography.labelSmall
             )
         }
@@ -178,7 +291,7 @@ private fun CommentReplies(
     Column {
         for (reply in replies.data.children) {
             Comment(
-                data = reply.data,
+                comment = reply.data,
                 modifier = Modifier.padding(start = padding, top = 2.dp, end = 16.dp, bottom = 2.dp)
             )
 

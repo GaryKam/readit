@@ -24,22 +24,22 @@ data class RedditPost(
         val thumbnail: String?,
         @SerializedName("secure_media")
         val videoData: VideoData?
-    )
+    ) {
+        val hasImage: Boolean
+            get() = url?.endsWith(".jpeg") ?: false
 
-    val hasImage: Boolean
-        get() = data.url?.endsWith(".jpeg") ?: false
+        val hasGallery: Boolean
+            get() = galleryData != null && mediaMetadata != null
 
-    val hasGallery: Boolean
-        get() = data.galleryData != null && data.mediaMetadata != null
+        val hasThumbnail: Boolean
+            get() = thumbnail?.endsWith(".jpg") ?: false
 
-    val hasThumbnail: Boolean
-        get() = data.thumbnail?.endsWith(".jpg") ?: false
+        val hasLink: Boolean
+            get() = text.isNullOrEmpty() && !url.isNullOrEmpty()
 
-    val hasLink: Boolean
-        get() = data.text.isNullOrEmpty() && !data.url.isNullOrEmpty()
-
-    val hasVideo: Boolean
-        get() = data.videoData != null
+        val hasVideo: Boolean
+            get() = videoData != null
+    }
 }
 
 data class GalleryData(

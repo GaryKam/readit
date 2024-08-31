@@ -49,14 +49,14 @@ fun ReadItNavHost(
                 subreddit = route.subreddit,
                 postId = route.postId,
                 onAppBarStateUpdate = onAppBarStateUpdate,
-                onNavigateBack = { navController.navigate(Subreddit) }
+                onNavigateBack = { navController.navigateUp() }
             )
         }
 
         composable<Profile> {
             ProfileScreen(
                 onAppBarStateUpdate = onAppBarStateUpdate,
-                onNavigateBack = { navController.navigate(Subreddit) },
+                onNavigateBack = { navController.navigateUp() },
                 onNavigateToAuth = { context.startActivity(Intent(context, AuthActivity::class.java)) },
                 modifier = Modifier.fillMaxSize()
             )

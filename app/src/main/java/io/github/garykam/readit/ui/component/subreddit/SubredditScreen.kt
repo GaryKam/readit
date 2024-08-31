@@ -1,6 +1,5 @@
 package io.github.garykam.readit.ui.component.subreddit
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -56,7 +55,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import io.github.garykam.readit.R
@@ -235,7 +233,7 @@ private fun RedditPosts(
             key = { it.data.id }
         ) { post ->
             RedditPost(
-                post = post,
+                post = post.data,
                 onPostClick = onPostClick,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -258,28 +256,26 @@ private fun RedditPosts(
 
 @Composable
 private fun RedditPost(
-    post: RedditPost,
+    post: RedditPost.Data,
     onPostClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val data = post.data
-
     Surface(
         modifier = modifier,
         shadowElevation = 8.dp
     ) {
         Column(
             modifier = Modifier
-                .clickable { onPostClick(data.id) }
+                .clickable { onPostClick(post.id) }
                 .padding(vertical = 8.dp)
         ) {
             Text(
-                text = "u/${data.author} • ${data.created.toElapsed()}",
+                text = "u/${post.author} • ${post.created.toElapsed()}",
                 modifier = Modifier.padding(horizontal = 16.dp),
                 style = MaterialTheme.typography.labelMedium
             )
             Text(
-                text = data.title.removeSuffix("\n"),
+                text = post.title.removeSuffix("\n"),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                 fontWeight = FontWeight.SemiBold,
                 style = MaterialTheme.typography.bodyLarge
@@ -287,9 +283,11 @@ private fun RedditPost(
             when {
                 post.hasImage -> {
                     AsyncImage(
-                        model = data.url,
+                        model = post.url,
                         contentDescription = "post image",
                         modifier = Modifier
+                            .sizeIn(maxHeight = 300.dp)
+                            .align(Alignment.CenterHorizontally)
                             .padding(vertical = 4.dp)
                             .clickable(false) {}
                     )
@@ -297,8 +295,8 @@ private fun RedditPost(
 
                 post.hasGallery -> {
                     Gallery(
-                        galleryData = data.galleryData!!,
-                        mediaMetadata = data.mediaMetadata!!.toImmutableMap(),
+                        galleryData = post.galleryData!!,
+                        mediaMetadata = post.mediaMetadata!!.toImmutableMap(),
                         modifier = Modifier.heightIn(max = 300.dp)
                     )
                 }
@@ -314,16 +312,16 @@ private fun RedditPost(
                         Text(
                             text = buildAnnotatedString {
                                 withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                                    append(data.url)
+                                    append(post.url)
                                 }
-                                addLink(LinkAnnotation.Url(data.url!!), 0, data.url.length)
+                                addLink(LinkAnnotation.Url(post.url!!), 0, post.url.length)
                             },
                             modifier = Modifier.weight(0.7f),
                             style = MaterialTheme.typography.bodySmall
                         )
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
-                                .data(data.thumbnail)
+                                .data(post.thumbnail)
                                 .crossfade(true)
                                 .build(),
                             contentDescription = "thumbnail image",
@@ -337,7 +335,7 @@ private fun RedditPost(
 
                 post.hasVideo -> {
                     MediaPlayer(
-                        url = data.videoData!!.data.dashUrl,
+                        url = post.videoData!!.data.dashUrl,
                         modifier = Modifier
                             .fillMaxWidth()
                             .sizeIn(maxHeight = 300.dp)
@@ -348,9 +346,9 @@ private fun RedditPost(
                     Text(
                         text = buildAnnotatedString {
                             withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                                append(data.url)
+                                append(post.url)
                             }
-                            addLink(LinkAnnotation.Url(data.url!!), 0, data.url.length)
+                            addLink(LinkAnnotation.Url(post.url!!), 0, post.url.length)
                         },
                         modifier = Modifier.padding(horizontal = 16.dp),
                         overflow = TextOverflow.Ellipsis,
@@ -359,9 +357,9 @@ private fun RedditPost(
                     )
                 }
 
-                data.text != null -> {
+                post.text != null -> {
                     HtmlText(
-                        text = data.text,
+                        text = post.text,
                         modifier = Modifier.padding(horizontal = 16.dp),
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 4,
@@ -382,7 +380,7 @@ private fun RedditPost(
                         modifier = Modifier.scale(0.7F)
                     )
                     Text(
-                        text = data.score.toString(),
+                        text = post.score.toString(),
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
@@ -398,7 +396,7 @@ private fun RedditPost(
                         modifier = Modifier.scale(0.8F)
                     )
                     Text(
-                        text = data.comments.toShortened(),
+                        text = post.comments.toShortened(),
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
