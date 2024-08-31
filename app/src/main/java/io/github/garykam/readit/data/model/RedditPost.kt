@@ -21,7 +21,9 @@ data class RedditPost(
         val galleryData: GalleryData?,
         @SerializedName("media_metadata")
         val mediaMetadata: Map<String, MediaMetadata>?,
-        val thumbnail: String?
+        val thumbnail: String?,
+        @SerializedName("secure_media")
+        val videoData: VideoData?
     )
 
     val hasImage: Boolean
@@ -33,8 +35,11 @@ data class RedditPost(
     val hasThumbnail: Boolean
         get() = data.thumbnail?.endsWith(".jpg") ?: false
 
-    val isLink: Boolean
+    val hasLink: Boolean
         get() = data.text.isNullOrEmpty() && !data.url.isNullOrEmpty()
+
+    val hasVideo: Boolean
+        get() = data.videoData != null
 }
 
 data class GalleryData(
@@ -56,5 +61,20 @@ data class MediaMetadata(
         val y: Int,
         @SerializedName("u")
         val image: String
+    )
+}
+
+data class VideoData(
+    @SerializedName("reddit_video")
+    val data: Data
+) {
+    data class Data(
+        val width: Int,
+        val height: Int,
+        @SerializedName("dash_url")
+        val dashUrl: String,
+        // @SerializedName("hls_url")
+        // val hlsUrl: String,
+        val duration: Int
     )
 }

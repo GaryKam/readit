@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -54,6 +56,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import io.github.garykam.readit.R
@@ -62,6 +65,7 @@ import io.github.garykam.readit.ui.component.common.DropdownButton
 import io.github.garykam.readit.ui.component.common.Gallery
 import io.github.garykam.readit.ui.component.common.HtmlText
 import io.github.garykam.readit.ui.component.common.ItemDrawer
+import io.github.garykam.readit.ui.component.common.MediaPlayer
 import io.github.garykam.readit.ui.component.common.Pill
 import io.github.garykam.readit.ui.component.common.SearchBar
 import io.github.garykam.readit.ui.component.main.AppBarState
@@ -295,7 +299,7 @@ private fun RedditPost(
                     Gallery(
                         galleryData = data.galleryData!!,
                         mediaMetadata = data.mediaMetadata!!.toImmutableMap(),
-                        modifier = Modifier.height(300.dp)
+                        modifier = Modifier.heightIn(max = 300.dp)
                     )
                 }
 
@@ -331,7 +335,16 @@ private fun RedditPost(
                     }
                 }
 
-                post.isLink -> {
+                post.hasVideo -> {
+                    MediaPlayer(
+                        url = data.videoData!!.data.dashUrl,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .sizeIn(maxHeight = 300.dp)
+                    )
+                }
+
+                post.hasLink -> {
                     Text(
                         text = buildAnnotatedString {
                             withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
