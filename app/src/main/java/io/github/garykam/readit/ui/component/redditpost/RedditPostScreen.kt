@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +49,7 @@ import coil.request.ImageRequest
 import io.github.garykam.readit.R
 import io.github.garykam.readit.data.model.RedditListing
 import io.github.garykam.readit.data.model.RedditPostComment
+import io.github.garykam.readit.ui.component.common.DropdownButton
 import io.github.garykam.readit.ui.component.common.Gallery
 import io.github.garykam.readit.ui.component.common.HtmlText
 import io.github.garykam.readit.ui.component.common.MediaPlayer
@@ -55,6 +57,7 @@ import io.github.garykam.readit.ui.component.common.Pill
 import io.github.garykam.readit.ui.component.main.AppBarState
 import io.github.garykam.readit.util.toElapsed
 import io.github.garykam.readit.util.toShortened
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 
 @Composable
@@ -67,6 +70,8 @@ fun RedditPostScreen(
     viewModel: RedditPostViewModel = hiltViewModel()
 ) {
     val comments by viewModel.comments.collectAsState()
+    val commentSort by viewModel.commentSort.collectAsState()
+    val content by viewModel.content.collectAsState()
 
     LaunchedEffect(key1 = true) {
         onAppBarStateUpdate(
@@ -83,7 +88,7 @@ fun RedditPostScreen(
             )
         )
 
-        viewModel.showComments(subreddit, postId)
+        viewModel.loadComments(subreddit, postId)
     }
 
     LazyColumn(
@@ -92,10 +97,20 @@ fun RedditPostScreen(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         // Main content of the reddit post
-        comments.firstOrNull()?.let {
+        content?.data?.let {
             item {
-                Content(post = it.data)
+                Content(post = it)
             }
+        }
+
+        // Comment sort button
+        item {
+            DropdownButton(
+                items = viewModel.sortMap.keys.toImmutableList(),
+                selectedItem = commentSort,
+                onItemClick = { viewModel.sortComments(subreddit, postId, it) },
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onBackground)
+            )
         }
 
         val startPadding = 16.dp
@@ -143,9 +158,9 @@ private fun Content(post: RedditPostComment.Data) {
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                 style = MaterialTheme.typography.headlineSmall
             )
-            post.header?.let { text ->
+            post.header?.let {
                 HtmlText(
-                    text = text,
+                    text = it,
                     modifier = Modifier.padding(horizontal = 16.dp),
                     style = MaterialTheme.typography.titleMedium
                 )

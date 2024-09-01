@@ -45,8 +45,9 @@ class RedditRepository @Inject constructor(
 
     suspend fun getCommentsFromId(
         subreddit: String,
-        postId: String
+        postId: String,
+        sort: String
     ): List<RedditListing<RedditPostComment>>? {
-        return api.getRedditPostCommentsListing(accessToken, subreddit, postId).awaitResponse().body()
+        return api.getRedditPostCommentsListing(accessToken, subreddit, postId, sort).awaitResponse().body()
     }
 }

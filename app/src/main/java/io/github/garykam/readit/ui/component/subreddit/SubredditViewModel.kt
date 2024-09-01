@@ -71,21 +71,6 @@ class SubredditViewModel @Inject constructor(
         PreferenceUtil.setSubreddit(subreddit)
     }
 
-    fun orderPosts(
-        order: String,
-        topPostOrder: String = topOrderMap.keys.elementAt(1)
-    ) {
-        if (_activeSubreddit.value.isNotEmpty()) {
-            _redditPosts.update { emptyList() }
-            _postOrder.update { order }
-            _topPostOrder.update { topPostOrder }
-            _after.update { null }
-
-            loadPosts()
-            PreferenceUtil.setPostOrder(_activeSubreddit.value, order)
-        }
-    }
-
     fun loadPosts() {
         viewModelScope.launch {
             val subreddit = _activeSubreddit.value
@@ -111,6 +96,21 @@ class SubredditViewModel @Inject constructor(
                 _redditPosts.update { it + data.children }
                 _after.update { data.after }
             }
+        }
+    }
+
+    fun orderPosts(
+        order: String,
+        topPostOrder: String = topOrderMap.keys.elementAt(1)
+    ) {
+        if (_activeSubreddit.value.isNotEmpty()) {
+            _redditPosts.update { emptyList() }
+            _postOrder.update { order }
+            _topPostOrder.update { topPostOrder }
+            _after.update { null }
+
+            loadPosts()
+            PreferenceUtil.setPostOrder(_activeSubreddit.value, order)
         }
     }
 

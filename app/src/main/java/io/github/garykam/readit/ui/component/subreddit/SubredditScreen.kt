@@ -173,12 +173,13 @@ fun SubredditScreen(
             selectedOrder = postOrder,
             selectedTopOrder = topPostOrder,
             onOrderClick = { viewModel.orderPosts(it) },
-            onTopOrderClick = { viewModel.orderPosts(postOrder, it) }
+            onTopOrderClick = { viewModel.orderPosts(postOrder, it) },
+            modifier = Modifier.padding(horizontal = 16.dp)
         )
         RedditPosts(
             canLoadMore = viewModel.canLoadMore,
             posts = redditPosts.toImmutableList(),
-            onPostClick = { postId -> onNavigateToRedditPost(activeSubreddit, postId) },
+            onPostClick = { onNavigateToRedditPost(activeSubreddit, it) },
             onLoadClick = { viewModel.loadPosts() },
             modifier = Modifier
                 .fillMaxSize()

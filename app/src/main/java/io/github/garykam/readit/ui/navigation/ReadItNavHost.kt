@@ -49,7 +49,8 @@ fun ReadItNavHost(
                 subreddit = route.subreddit,
                 postId = route.postId,
                 onAppBarStateUpdate = onAppBarStateUpdate,
-                onNavigateBack = { navController.navigateUp() }
+                onNavigateBack = { navController.navigateUp() },
+                modifier = Modifier.fillMaxSize()
             )
         }
 

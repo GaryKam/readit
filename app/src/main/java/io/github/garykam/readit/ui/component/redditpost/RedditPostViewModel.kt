@@ -15,19 +15,47 @@ import javax.inject.Inject
 class RedditPostViewModel @Inject constructor(
     private val repository: RedditRepository
 ) : ViewModel() {
+    val sortMap = mapOf(
+        "BEST" to "confidence", "TOP" to "top", "NEW" to "new",
+        "CONTROVERSIAL" to "controversial", "OLD" to "old", "Q&A" to "qa"
+    )
+    private val _content = MutableStateFlow<RedditPostComment?>(null)
     private val _comments = MutableStateFlow<List<RedditPostComment>>(emptyList())
+    private val _commentSort = MutableStateFlow(sortMap.keys.elementAt(0))
+    val content = _content.asStateFlow()
     val comments = _comments.asStateFlow()
+    val commentSort = _commentSort.asStateFlow()
 
-    fun showComments(subreddit: String, postId: String) {
+    fun loadComments(
+        subreddit: String,
+        postId: String
+    ) {
         viewModelScope.launch {
-            repository.getCommentsFromId(
+            val commentThreads = repository.getCommentsFromId(
                 subreddit.removePrefix("r/"),
-                postId.removePrefix("t3_")
-            )?.forEach { thread ->
+                postId.removePrefix("t3_"),
+                _commentSort.value
+            )
+
+            if (_content.value == null) {
+                _content.update { commentThreads?.firstOrNull()?.data?.children?.firstOrNull() }
+            }
+
+            commentThreads?.subList(1, commentThreads.size)?.forEach { thread ->
                 thread.data.children.forEach { comment ->
                     _comments.update { it + comment }
                 }
             }
         }
+    }
+
+    fun sortComments(
+        subreddit: String,
+        postId: String,
+        sortBy: String
+    ) {
+        _comments.update { emptyList() }
+        _commentSort.update { sortBy }
+        loadComments(subreddit, postId)
     }
 }

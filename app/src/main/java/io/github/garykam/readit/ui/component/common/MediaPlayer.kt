@@ -1,8 +1,10 @@
 package io.github.garykam.readit.ui.component.common
 
 import androidx.annotation.OptIn
+import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -20,26 +22,32 @@ fun MediaPlayer(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val exoPlayer = remember(url) {
+    val exoPlayer = ExoPlayer.Builder(context).build()
+
+    LaunchedEffect(key1 = url) {
         val mediaItem = MediaItem.Builder()
             .setUri(url)
             .setMimeType(MimeTypes.APPLICATION_MPD)
             .build()
 
-        ExoPlayer.Builder(context)
-            .build()
-            .apply {
-                setMediaItem(mediaItem)
-                prepare()
-            }
+        exoPlayer.setMediaItem(mediaItem)
+        exoPlayer.prepare()
     }
 
-    DisposableEffect(key1 = Unit) {
+    DisposableEffect(Unit) {
         onDispose { exoPlayer.release() }
     }
 
     AndroidView(
-        factory = { PlayerView(it).apply { player = exoPlayer } },
+        factory = {
+            PlayerView(it).apply {
+                player = exoPlayer
+                setShowPreviousButton(false)
+                setShowNextButton(false)
+                setShowRewindButton(false)
+                setShowFastForwardButton(false)
+            }
+        },
         modifier = modifier,
         onReset = {}
     )

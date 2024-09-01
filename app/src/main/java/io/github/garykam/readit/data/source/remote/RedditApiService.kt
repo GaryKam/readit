@@ -57,6 +57,7 @@ interface RedditApiService {
         @Header("Authorization") bearer: String,
         @Path("subreddit") subreddit: String,
         @Path("article") postId: String,
+        @Query("sort") sort: String,
         @Query("raw_json") rawJson: Int = 1
     ): Call<List<RedditListing<RedditPostComment>>>
 
