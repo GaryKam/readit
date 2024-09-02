@@ -109,6 +109,7 @@ fun RedditPostScreen(
                 items = viewModel.sortMap.keys.toImmutableList(),
                 selectedItem = commentSort,
                 onItemClick = { viewModel.sortComments(subreddit, postId, it) },
+                modifier = Modifier.padding(horizontal = 16.dp),
                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onBackground)
             )
         }

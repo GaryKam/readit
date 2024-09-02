@@ -1,19 +1,29 @@
 package io.github.garykam.readit.ui.component.common
 
 import androidx.annotation.OptIn
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.AndroidEmbeddedExternalSurface
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.PlayerView
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -21,34 +31,49 @@ fun MediaPlayer(
     url: String,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val exoPlayer = ExoPlayer.Builder(context).build()
-
-    LaunchedEffect(key1 = url) {
-        val mediaItem = MediaItem.Builder()
+    val mediaItem = remember {
+        MediaItem.Builder()
             .setUri(url)
             .setMimeType(MimeTypes.APPLICATION_MPD)
             .build()
-
-        exoPlayer.setMediaItem(mediaItem)
-        exoPlayer.prepare()
     }
-
-    DisposableEffect(Unit) {
-        onDispose { exoPlayer.release() }
+    val context = LocalContext.current
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(mediaItem)
+            prepare()
+        }
     }
+    var isPlaying by remember { mutableStateOf(false) }
 
-    AndroidView(
-        factory = {
-            PlayerView(it).apply {
-                player = exoPlayer
-                setShowPreviousButton(false)
-                setShowNextButton(false)
-                setShowRewindButton(false)
-                setShowFastForwardButton(false)
-            }
+    Box(
+        modifier = modifier.clickable {
+            isPlaying = !isPlaying
+            if (isPlaying) exoPlayer.play() else exoPlayer.pause()
         },
-        modifier = modifier,
-        onReset = {}
-    )
+        contentAlignment = Alignment.Center
+    ) {
+        AndroidEmbeddedExternalSurface {
+            onSurface { surface, _, _ ->
+                exoPlayer.setVideoSurface(surface)
+                surface.onDestroyed {
+                    exoPlayer.setVideoSurface(null)
+                    exoPlayer.release()
+                }
+            }
+        }
+
+        AnimatedVisibility(visible = !isPlaying) {
+            Icon(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = "play",
+                modifier = Modifier
+                    .scale(2F)
+                    .background(
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7F),
+                        shape = CircleShape
+                    )
+            )
+        }
+    }
 }
