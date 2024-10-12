@@ -1,5 +1,8 @@
 package io.github.garykam.readit.ui.component.redditpost
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -30,6 +33,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,6 +66,7 @@ import io.github.garykam.readit.util.toShortened
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RedditPostScreen(
     subreddit: String,
@@ -120,19 +127,29 @@ fun RedditPostScreen(
             key = { it.data.id }
         ) {
             val comment = it.data
+            var areRepliesExpanded by remember { mutableStateOf(true) }
             // Individual reply to the main content
             if (comment.text != null && comment.author != "[deleted]") {
-                Comment(
-                    comment = comment,
-                    modifier = Modifier.padding(start = startPadding, top = 2.dp, end = 16.dp, bottom = 2.dp)
-                )
-
-                // Nested replies to the individual reply
-                comment.replies?.let { replies ->
-                    CommentReplies(
-                        replies = replies,
-                        padding = startPadding + 8.dp
+                Column {
+                    Comment(
+                        comment = comment,
+                        modifier = Modifier
+                            .padding(start = startPadding, top = 2.dp, end = 16.dp, bottom = 2.dp)
+                            .combinedClickable(
+                                onLongClick = { areRepliesExpanded = !areRepliesExpanded },
+                                onClick = {}
+                            )
                     )
+
+                    AnimatedVisibility(visible = areRepliesExpanded) {
+                        // Nested replies to the individual reply
+                        comment.replies?.let { replies ->
+                            CommentReplies(
+                                replies = replies,
+                                padding = startPadding + 8.dp
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -299,6 +316,7 @@ private fun Comment(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CommentReplies(
     replies: RedditListing<RedditPostComment>,
@@ -306,20 +324,28 @@ private fun CommentReplies(
 ) {
     Column {
         for (reply in replies.data.children) {
-            if (reply.data.author == null) {
+            if (reply.data.author == null || reply.data.author == "[deleted]") {
                 continue
             }
 
+            var areRepliesExpanded by remember { mutableStateOf(true) }
             Comment(
                 comment = reply.data,
-                modifier = Modifier.padding(start = padding, top = 2.dp, end = 16.dp, bottom = 2.dp)
+                modifier = Modifier
+                    .padding(start = padding, top = 2.dp, end = 16.dp, bottom = 2.dp)
+                    .combinedClickable(
+                        onLongClick = { areRepliesExpanded = !areRepliesExpanded },
+                        onClick = {}
+                    )
             )
 
-            reply.data.replies?.let {
-                CommentReplies(
-                    replies = it,
-                    padding = padding + 8.dp
-                )
+            AnimatedVisibility(visible = areRepliesExpanded) {
+                reply.data.replies?.let {
+                    CommentReplies(
+                        replies = it,
+                        padding = padding + 8.dp
+                    )
+                }
             }
         }
     }
