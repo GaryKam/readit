@@ -52,6 +52,20 @@ interface RedditApiService {
     ): Call<RedditListing<RedditPost>>
 
     @Headers(USER_AGENT_HEADER)
+    @GET("r/{subreddit}/search")
+    fun getSearchPostsListing(
+        @Header("Authorization") bearer: String,
+        @Path("subreddit") subreddit: String,
+        @Query("sort") order: String,
+        @Query("t") topOrder: String?,
+        @Query("after") after: String?,
+        @Query("q") query: String,
+        @Query("type") type: String = "link",
+        @Query("restrict_sr") restrictSubreddit: String = "true",
+        @Query("raw_json") rawJson: Int = 1
+    ): Call<RedditListing<RedditPost>>
+
+    @Headers(USER_AGENT_HEADER)
     @GET("r/{subreddit}/comments/{article}")
     fun getRedditPostCommentsListing(
         @Header("Authorization") bearer: String,

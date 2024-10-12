@@ -102,8 +102,9 @@ fun SubredditScreen(
                         onQueryChange = { viewModel.changeSearch(it) },
                         onSearch = {
                             focusManager.clearFocus()
-                            viewModel.selectSubreddit(it)
+                            viewModel.searchSubreddit(it)
                         },
+                        modifier = Modifier.fillMaxWidth(),
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Search,

@@ -43,6 +43,16 @@ class RedditRepository @Inject constructor(
         return api.getUserProfilePostsListing(accessToken, user, where, after).awaitResponse().body()
     }
 
+    suspend fun getPostsFromSearch(
+        subreddit: String,
+        postOrder: String,
+        topPostOrder: String?,
+        after: String?,
+        query: String
+    ): RedditListing<RedditPost>? {
+        return api.getSearchPostsListing(accessToken, subreddit, postOrder, topPostOrder, after, query).awaitResponse().body()
+    }
+
     suspend fun getCommentsFromId(
         subreddit: String,
         postId: String,

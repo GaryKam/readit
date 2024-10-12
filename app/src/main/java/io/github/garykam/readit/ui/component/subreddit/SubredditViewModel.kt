@@ -55,8 +55,24 @@ class SubredditViewModel @Inject constructor(
         _subredditSearch.update { subreddit }
     }
 
+    fun searchSubreddit(query: String) {
+        when {
+            query.startsWith(SUBREDDIT_PREFIX) || query.startsWith(USER_PROFILE_PREFIX) -> {
+                selectSubreddit(query)
+            }
+
+            else -> viewModelScope.launch {
+                _redditPosts.update { emptyList() }
+                _subredditSearch.update { query }
+                _after.update { null }
+
+                loadPosts()
+            }
+        }
+    }
+
     fun selectSubreddit(subreddit: String) {
-        if (_activeSubreddit.value == subreddit || subreddit.isEmpty()) {
+        if (subreddit.isEmpty()) {
             return
         }
 
@@ -75,6 +91,16 @@ class SubredditViewModel @Inject constructor(
         viewModelScope.launch {
             val subreddit = _activeSubreddit.value
             val subredditPosts = when {
+                !_subredditSearch.value.startsWith(SUBREDDIT_PREFIX) && !_subredditSearch.value.startsWith(USER_PROFILE_PREFIX) -> {
+                    repository.getPostsFromSearch(
+                        subreddit.removePrefix(SUBREDDIT_PREFIX).removePrefix(USER_PROFILE_PREFIX),
+                        _postOrder.value.lowercase(),
+                        if (_postOrder.value == orderList[2]) topOrderMap[_topPostOrder.value] else null,
+                        _after.value,
+                        _subredditSearch.value
+                    )
+                }
+
                 subreddit.startsWith(SUBREDDIT_PREFIX) ->
                     repository.getPostsFromSubreddit(
                         subreddit.removePrefix(SUBREDDIT_PREFIX),
@@ -91,6 +117,7 @@ class SubredditViewModel @Inject constructor(
 
                 else -> null
             }
+
 
             subredditPosts?.data?.let { data ->
                 _redditPosts.update { it + data.children }
