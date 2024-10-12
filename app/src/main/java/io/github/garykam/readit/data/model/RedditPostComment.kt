@@ -10,7 +10,7 @@ data class RedditPostComment(
     data class Data(
         @SerializedName("name")
         val id: String,
-        val author: String,
+        val author: String?,
         val title: String,
         @SerializedName("selftext_html")
         val header: String?,

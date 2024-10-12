@@ -121,7 +121,7 @@ fun RedditPostScreen(
         ) {
             val comment = it.data
             // Individual reply to the main content
-            if (comment.text != null) {
+            if (comment.text != null && comment.author != "[deleted]") {
                 Comment(
                     comment = comment,
                     modifier = Modifier.padding(start = startPadding, top = 2.dp, end = 16.dp, bottom = 2.dp)
@@ -306,6 +306,10 @@ private fun CommentReplies(
 ) {
     Column {
         for (reply in replies.data.children) {
+            if (reply.data.author == null) {
+                continue
+            }
+
             Comment(
                 comment = reply.data,
                 modifier = Modifier.padding(start = padding, top = 2.dp, end = 16.dp, bottom = 2.dp)
