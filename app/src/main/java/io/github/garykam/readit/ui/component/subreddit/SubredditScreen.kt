@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -107,7 +108,15 @@ fun SubredditScreen(
                             focusManager.clearFocus()
                             viewModel.searchSubreddit(it)
                         },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onFocusChanged {
+                                if (it.isFocused) {
+                                    scope.launch {
+                                        drawerState.close()
+                                    }
+                                }
+                            },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Search,
@@ -135,6 +144,7 @@ fun SubredditScreen(
                             scope.launch {
                                 drawerState.apply { if (isClosed) open() else close() }
                             }
+                            focusManager.clearFocus()
                         }
                     ) {
                         Icon(

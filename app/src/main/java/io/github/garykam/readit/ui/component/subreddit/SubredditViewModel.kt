@@ -71,7 +71,9 @@ class SubredditViewModel @Inject constructor(
     fun searchSubreddit(query: String) {
         when {
             query.startsWith(SUBREDDIT_PREFIX) || query.startsWith(USER_PROFILE_PREFIX) -> {
-                _subscribedSubreddits.update { it + query }
+                if (!_subscribedSubreddits.value.contains(query)) {
+                    _subscribedSubreddits.update { it + query }
+                }
                 selectSubreddit(query)
             }
 
