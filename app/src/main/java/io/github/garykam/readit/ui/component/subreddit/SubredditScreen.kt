@@ -1,5 +1,6 @@
 package io.github.garykam.readit.ui.component.subreddit
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
@@ -92,6 +94,7 @@ fun SubredditScreen(
     val subredditSearch by viewModel.subredditSearch.collectAsState()
     val postOrder by viewModel.postOrder.collectAsState()
     val topPostOrder by viewModel.topPostOrder.collectAsState()
+    val subredditToSubscribe by viewModel.subredditToSubscribe.collectAsState()
 
     LaunchedEffect(key1 = true) {
         onAppBarStateUpdate(
@@ -157,14 +160,15 @@ fun SubredditScreen(
     }
 
     ItemDrawer(
-        items = subscribedSubreddits
-            .map { it.data.prefixedName }
-            .toImmutableList(),
+        items = subscribedSubreddits.toImmutableList(),
         selectedItem = activeSubreddit,
         drawerState = drawerState,
         onItemClick = {
             viewModel.selectSubreddit(it)
             scope.launch { drawerState.close() }
+        },
+        onItemLongClick = {
+            Log.d("TAG", "test")
         },
         modifier = modifier
     ) {
@@ -185,6 +189,15 @@ fun SubredditScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
+        )
+    }
+
+    if (subredditToSubscribe.isNotEmpty()) {
+        AlertDialog(
+            onDismissRequest = { viewModel.promptSubscribe("") },
+            confirmButton = { viewModel.confirmSubscribe() },
+            dismissButton = { viewModel.promptSubscribe("") },
+            text = { Text(text = "Subscribe to $subredditToSubscribe?") }
         )
     }
 }
@@ -382,7 +395,7 @@ private fun RedditPost(
                         modifier = Modifier.scale(0.7F)
                     )
                     Text(
-                        text = post.score.toString(),
+                        text = post.score.toShortened(),
                         style = MaterialTheme.typography.labelSmall
                     )
                 }

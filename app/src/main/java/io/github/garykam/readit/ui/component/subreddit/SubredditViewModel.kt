@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.garykam.readit.data.model.RedditPost
 import io.github.garykam.readit.data.model.RedditUser
-import io.github.garykam.readit.data.model.Subreddit
 import io.github.garykam.readit.data.repository.RedditRepository
 import io.github.garykam.readit.util.PreferenceUtil
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,18 +18,20 @@ class SubredditViewModel @Inject constructor(
     private val repository: RedditRepository
 ) : ViewModel() {
     private val _user = MutableStateFlow<RedditUser?>(null)
-    private val _subscribedSubreddits = MutableStateFlow<List<Subreddit>>(emptyList())
+    private val _subscribedSubreddits = MutableStateFlow<List<String>>(emptyList())
     private val _redditPosts = MutableStateFlow<List<RedditPost>>(emptyList())
     private val _activeSubreddit = MutableStateFlow("")
     private val _subredditSearch = MutableStateFlow("")
     private val _postOrder = MutableStateFlow("")
     private val _topPostOrder = MutableStateFlow("")
     private var _after = MutableStateFlow<String?>(null)
+    private var _subredditToSubscribe = MutableStateFlow("")
     val user = _user.asStateFlow()
     val subscribedSubreddits = _subscribedSubreddits.asStateFlow()
     val redditPosts = _redditPosts.asStateFlow()
     val activeSubreddit = _activeSubreddit.asStateFlow()
     val subredditSearch = _subredditSearch.asStateFlow()
+    val subredditToSubscribe = _subredditToSubscribe.asStateFlow()
     val postOrder = _postOrder.asStateFlow()
     val topPostOrder = _topPostOrder.asStateFlow()
     val orderList = listOf("HOT", "NEW", "TOP", "RISING")
@@ -43,10 +44,22 @@ class SubredditViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            selectSubreddit(PreferenceUtil.getSubreddit())
+            val activeSubreddit = PreferenceUtil.getSubreddit()
+            selectSubreddit(activeSubreddit)
+
             _user.update { repository.getUser() }
-            repository.getSubscribedSubreddits()?.data?.children?.let { subreddits ->
-                _subscribedSubreddits.update { subreddits }
+
+            val favoriteSubreddits = PreferenceUtil.getFavoriteSubreddits().toList()
+            _subscribedSubreddits.update { favoriteSubreddits }
+            var isAlreadySubscribed = false
+            for (subreddit in favoriteSubreddits) {
+                if (subreddit == activeSubreddit) {
+                    isAlreadySubscribed = true
+                    break
+                }
+            }
+            if (!isAlreadySubscribed) {
+                _subscribedSubreddits.update { it + activeSubreddit }
             }
         }
     }
@@ -58,6 +71,7 @@ class SubredditViewModel @Inject constructor(
     fun searchSubreddit(query: String) {
         when {
             query.startsWith(SUBREDDIT_PREFIX) || query.startsWith(USER_PROFILE_PREFIX) -> {
+                _subscribedSubreddits.update { it + query }
                 selectSubreddit(query)
             }
 
@@ -88,6 +102,7 @@ class SubredditViewModel @Inject constructor(
     }
 
     fun loadPosts() {
+
         viewModelScope.launch {
             val subreddit = _activeSubreddit.value
             val subredditPosts = when {
@@ -139,6 +154,14 @@ class SubredditViewModel @Inject constructor(
             loadPosts()
             PreferenceUtil.setPostOrder(_activeSubreddit.value, order)
         }
+    }
+
+    fun promptSubscribe(subreddit: String) {
+        _subredditToSubscribe.update { subreddit }
+    }
+
+    fun confirmSubscribe() {
+
     }
 
     companion object {

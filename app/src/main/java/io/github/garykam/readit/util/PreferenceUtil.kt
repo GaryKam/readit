@@ -14,6 +14,7 @@ object PreferenceUtil {
     private const val KEY_REFRESH_TOKEN = "refresh_token"
     private const val KEY_TOKEN_EXPIRATION = "token_expire"
     private const val KEY_SUBREDDIT = "subreddit"
+    private const val KEY_FAVORITE_SUBREDDITS = "favorite_subreddits"
     private const val KEY_ORDER_SUFFIX = "_order"
     private const val DEFAULT_TOKEN = ""
     private const val DEFAULT_TOKEN_EXPIRATION = -1L
@@ -72,6 +73,14 @@ object PreferenceUtil {
 
     fun setSubreddit(subreddit: String) {
         sharedPreferences.edit().putString(KEY_SUBREDDIT, subreddit).apply()
+    }
+
+    fun getFavoriteSubreddits(): Set<String> {
+        return sharedPreferences.getStringSet(KEY_FAVORITE_SUBREDDITS, emptySet()).orEmpty()
+    }
+
+    fun setFavoriteSubreddits(subreddits: Set<String>) {
+        sharedPreferences.edit().putStringSet(KEY_FAVORITE_SUBREDDITS, subreddits).apply()
     }
 
     fun getPostOrder(subreddit: String): String {

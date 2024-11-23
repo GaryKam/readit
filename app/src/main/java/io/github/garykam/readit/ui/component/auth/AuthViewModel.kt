@@ -13,6 +13,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.garykam.readit.R
 import io.github.garykam.readit.data.model.RedditAuthResult
 import io.github.garykam.readit.data.repository.RedditAuthRepository
+import io.github.garykam.readit.data.repository.RedditRepository
 import io.github.garykam.readit.util.PreferenceUtil
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -20,7 +21,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val repository: RedditAuthRepository
+    private val authRepository: RedditAuthRepository,
+    private val redditRepository: RedditRepository
 ) : ViewModel() {
     fun launchAuthBrowser(context: Context) {
         CustomTabsIntent.Builder()
@@ -35,7 +37,7 @@ class AuthViewModel @Inject constructor(
             .build()
             .run {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK + Intent.FLAG_ACTIVITY_NO_HISTORY)
-                launchUrl(context, repository.authUrl)
+                launchUrl(context, authRepository.authUrl)
             }
     }
 
@@ -48,7 +50,7 @@ class AuthViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val authResponse = repository.fetchAuthResponse(code, state)
+            val authResponse = authRepository.fetchAuthResponse(code, state)
 
             if (authResponse.accessToken.isNotEmpty()) {
                 PreferenceUtil.setAccessToken(authResponse.accessToken)
@@ -67,7 +69,7 @@ class AuthViewModel @Inject constructor(
         val authResult = MutableLiveData<RedditAuthResult>()
 
         viewModelScope.launch {
-            val authResponse = repository.fetchAuthResponse()
+            val authResponse = authRepository.fetchAuthResponse()
 
             if (authResponse.accessToken.isNotEmpty()) {
                 PreferenceUtil.setAccessToken(authResponse.accessToken)
@@ -79,5 +81,13 @@ class AuthViewModel @Inject constructor(
         }
 
         return authResult
+    }
+
+    fun saveSubscribedSubreddits() {
+        viewModelScope.launch {
+            redditRepository.getSubscribedSubreddits()?.data?.children?.let { subscribedSubreddits ->
+                PreferenceUtil.setFavoriteSubreddits(subscribedSubreddits.map { it.data.prefixedName }.toSet())
+            }
+        }
     }
 }

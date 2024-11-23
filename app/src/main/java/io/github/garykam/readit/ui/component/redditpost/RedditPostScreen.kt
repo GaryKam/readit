@@ -255,7 +255,7 @@ private fun Content(post: RedditPostComment.Data) {
                         modifier = Modifier.scale(0.7F)
                     )
                     Text(
-                        text = post.score.toString(),
+                        text = post.score.toShortened(),
                         style = MaterialTheme.typography.labelSmall
                     )
                 }

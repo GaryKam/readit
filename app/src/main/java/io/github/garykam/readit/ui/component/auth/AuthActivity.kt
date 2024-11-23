@@ -84,6 +84,7 @@ class AuthActivity : ComponentActivity() {
         viewModel.retrieveAccessToken(error, state, code).observe(this) { authResult ->
             when (authResult) {
                 is RedditAuthResult.Success -> {
+                    viewModel.saveSubscribedSubreddits()
                     startActivity(Intent(this, MainActivity::class.java))
                 }
 
