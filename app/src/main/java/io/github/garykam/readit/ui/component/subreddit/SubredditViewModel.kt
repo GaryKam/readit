@@ -19,6 +19,7 @@ class SubredditViewModel @Inject constructor(
 ) : ViewModel() {
     private val _user = MutableStateFlow<RedditUser?>(null)
     private val _subscribedSubreddits = MutableStateFlow<List<String>>(emptyList())
+    private val _localSubscribedSubreddits = MutableStateFlow<List<String>>(emptyList())
     private val _redditPosts = MutableStateFlow<List<RedditPost>>(emptyList())
     private val _activeSubreddit = MutableStateFlow("")
     private val _subredditSearch = MutableStateFlow("")
@@ -28,6 +29,7 @@ class SubredditViewModel @Inject constructor(
     private var _subredditToSubscribe = MutableStateFlow("")
     val user = _user.asStateFlow()
     val subscribedSubreddits = _subscribedSubreddits.asStateFlow()
+    val localSubscribedSubreddits = _localSubscribedSubreddits.asStateFlow()
     val redditPosts = _redditPosts.asStateFlow()
     val activeSubreddit = _activeSubreddit.asStateFlow()
     val subredditSearch = _subredditSearch.asStateFlow()
@@ -49,18 +51,24 @@ class SubredditViewModel @Inject constructor(
 
             _user.update { repository.getUser() }
 
-            val favoriteSubreddits = PreferenceUtil.getFavoriteSubreddits().toList()
-            _subscribedSubreddits.update { favoriteSubreddits }
-            var isAlreadySubscribed = false
-            for (subreddit in favoriteSubreddits) {
-                if (subreddit == activeSubreddit) {
-                    isAlreadySubscribed = true
-                    break
+            if (PreferenceUtil.getSubscribedSubreddits().toList().isEmpty()) {
+                repository.getSubscribedSubreddits()?.data?.children?.let {
+                    PreferenceUtil.setSubscribedSubreddits(it.map { subbed -> subbed.data.prefixedName }.toSet())
+                }
+            } else {
+                var isAlreadySubscribed = false
+                for (subreddit in PreferenceUtil.getSubscribedSubreddits()) {
+                    if (subreddit == activeSubreddit) {
+                        isAlreadySubscribed = true
+                        break
+                    }
+                }
+                if (!isAlreadySubscribed && activeSubreddit.isNotBlank()) {
+                    _localSubscribedSubreddits.update { it + activeSubreddit }
                 }
             }
-            if (!isAlreadySubscribed) {
-                _subscribedSubreddits.update { it + activeSubreddit }
-            }
+
+            _subscribedSubreddits.update { PreferenceUtil.getSubscribedSubreddits().toList() + _localSubscribedSubreddits.value }
         }
     }
 
@@ -71,9 +79,11 @@ class SubredditViewModel @Inject constructor(
     fun searchSubreddit(query: String) {
         when {
             query.startsWith(SUBREDDIT_PREFIX) || query.startsWith(USER_PROFILE_PREFIX) -> {
-                if (!_subscribedSubreddits.value.contains(query)) {
+                if (!_subscribedSubreddits.value.contains(query) && !_localSubscribedSubreddits.value.contains(query)) {
+                    _localSubscribedSubreddits.update { it + query }
                     _subscribedSubreddits.update { it + query }
                 }
+
                 selectSubreddit(query)
             }
 
@@ -104,7 +114,6 @@ class SubredditViewModel @Inject constructor(
     }
 
     fun loadPosts() {
-
         viewModelScope.launch {
             val subreddit = _activeSubreddit.value
             val subredditPosts = when {
@@ -158,12 +167,25 @@ class SubredditViewModel @Inject constructor(
         }
     }
 
-    fun promptSubscribe(subreddit: String) {
+    fun promptSubscription(subreddit: String) {
         _subredditToSubscribe.update { subreddit }
     }
 
-    fun confirmSubscribe() {
+    fun confirmSubscription(isAlreadySubscribed: Boolean) {
+        if (isAlreadySubscribed) {
+            if (subredditToSubscribe.value != _activeSubreddit.value) {
+                _subscribedSubreddits.update { it - subredditToSubscribe.value }
+            }
 
+            _localSubscribedSubreddits.update { it + subredditToSubscribe.value }
+            _subscribedSubreddits.value.toMutableSet().apply {
+                remove(_subredditToSubscribe.value)
+                PreferenceUtil.setSubscribedSubreddits(this)
+            }
+        } else {
+            _localSubscribedSubreddits.update { it - subredditToSubscribe.value }
+            PreferenceUtil.setSubscribedSubreddits(_subscribedSubreddits.value.toSet())
+        }
     }
 
     companion object {

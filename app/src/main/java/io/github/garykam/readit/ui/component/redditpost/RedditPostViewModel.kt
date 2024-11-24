@@ -1,6 +1,5 @@
 package io.github.garykam.readit.ui.component.redditpost
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,7 +31,6 @@ class RedditPostViewModel @Inject constructor(
         postId: String
     ) {
         viewModelScope.launch {
-            Log.d("g", "$subreddit $postId")
             val commentThreads = repository.getCommentsFromId(
                 subreddit.removePrefix("r/"),
                 postId.removePrefix("t3_"),

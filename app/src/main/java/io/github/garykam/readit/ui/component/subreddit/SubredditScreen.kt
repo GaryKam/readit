@@ -1,6 +1,5 @@
 package io.github.garykam.readit.ui.component.subreddit
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -90,6 +90,7 @@ fun SubredditScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val user by viewModel.user.collectAsState()
     val subscribedSubreddits by viewModel.subscribedSubreddits.collectAsState()
+    val localSubscribedSubreddits by viewModel.localSubscribedSubreddits.collectAsState()
     val redditPosts by viewModel.redditPosts.collectAsState()
     val activeSubreddit by viewModel.activeSubreddit.collectAsState()
     val subredditSearch by viewModel.subredditSearch.collectAsState()
@@ -177,9 +178,7 @@ fun SubredditScreen(
             viewModel.selectSubreddit(it)
             scope.launch { drawerState.close() }
         },
-        onItemLongClick = {
-            Log.d("TAG", "test")
-        },
+        onItemLongClick = { viewModel.promptSubscription(it) },
         modifier = modifier
     ) {
         PostOrderButtons(
@@ -202,14 +201,12 @@ fun SubredditScreen(
         )
     }
 
-    if (subredditToSubscribe.isNotEmpty()) {
-        AlertDialog(
-            onDismissRequest = { viewModel.promptSubscribe("") },
-            confirmButton = { viewModel.confirmSubscribe() },
-            dismissButton = { viewModel.promptSubscribe("") },
-            text = { Text(text = "Subscribe to $subredditToSubscribe?") }
-        )
-    }
+    SubscribeDialog(
+        subreddit = subredditToSubscribe,
+        isAlreadySubscribed = subscribedSubreddits.contains(subredditToSubscribe) && !localSubscribedSubreddits.contains(subredditToSubscribe),
+        onDismiss = { viewModel.promptSubscription("") },
+        onConfirm = { viewModel.confirmSubscription(it) }
+    )
 }
 
 @Composable
@@ -427,5 +424,43 @@ private fun RedditPost(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun SubscribeDialog(
+    subreddit: String,
+    isAlreadySubscribed: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: (Boolean) -> Unit
+) {
+    if (subreddit.isNotEmpty()) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onConfirm(isAlreadySubscribed)
+                        onDismiss()
+                    }
+                ) {
+                    Text(text = "Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(text = "Dismiss")
+                }
+            },
+            text = {
+                Text(
+                    text = if (isAlreadySubscribed) {
+                        "Unsubscribe from $subreddit?"
+                    } else {
+                        "Subscribe to $subreddit?"
+                    }
+                )
+            }
+        )
     }
 }

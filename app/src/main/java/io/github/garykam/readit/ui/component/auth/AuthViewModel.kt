@@ -82,12 +82,4 @@ class AuthViewModel @Inject constructor(
 
         return authResult
     }
-
-    fun saveSubscribedSubreddits() {
-        viewModelScope.launch {
-            redditRepository.getSubscribedSubreddits()?.data?.children?.let { subscribedSubreddits ->
-                PreferenceUtil.setFavoriteSubreddits(subscribedSubreddits.map { it.data.prefixedName }.toSet())
-            }
-        }
-    }
 }
