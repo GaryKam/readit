@@ -24,7 +24,8 @@ fun ReadItNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     startDestination: Destination = Subreddit,
-    subredditViewModel: SubredditViewModel = hiltViewModel()
+    subredditViewModel: SubredditViewModel = hiltViewModel(),
+    onThemeChange: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -59,6 +60,7 @@ fun ReadItNavHost(
                 onAppBarStateUpdate = onAppBarStateUpdate,
                 onNavigateBack = { navController.navigateUp() },
                 onNavigateToAuth = { context.startActivity(Intent(context, AuthActivity::class.java)) },
+                onThemeChange = onThemeChange,
                 modifier = Modifier.fillMaxSize()
             )
         }

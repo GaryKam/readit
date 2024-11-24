@@ -16,6 +16,7 @@ object PreferenceUtil {
     private const val KEY_SUBREDDIT = "subreddit"
     private const val KEY_SUBSCRIBED_SUBREDDITS = "subscribed_subreddits"
     private const val KEY_ORDER_SUFFIX = "_order"
+    private const val KEY_DARK_THEME = "dark_theme"
     private const val DEFAULT_TOKEN = ""
     private const val DEFAULT_TOKEN_EXPIRATION = -1L
 
@@ -39,6 +40,7 @@ object PreferenceUtil {
         setTokenExpiration(DEFAULT_TOKEN_EXPIRATION)
         setSubreddit("")
         setSubscribedSubreddits(emptySet())
+        setDarkTheme(false)
     }
 
     fun getAccessToken(): String {
@@ -91,5 +93,13 @@ object PreferenceUtil {
 
     fun setPostOrder(subreddit: String, order: String) {
         sharedPreferences.edit().putString(subreddit + KEY_ORDER_SUFFIX, order).apply()
+    }
+
+    fun isDarkTheme(): Boolean {
+        return sharedPreferences.getBoolean(KEY_DARK_THEME, false)
+    }
+
+    fun setDarkTheme(darkTheme: Boolean) {
+        sharedPreferences.edit().putBoolean(KEY_DARK_THEME, darkTheme).apply()
     }
 }

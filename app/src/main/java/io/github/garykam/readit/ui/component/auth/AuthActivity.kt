@@ -7,15 +7,20 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.garykam.readit.R
 import io.github.garykam.readit.data.model.RedditAuthResult
 import io.github.garykam.readit.ui.component.main.MainActivity
 import io.github.garykam.readit.ui.theme.ReadItTheme
@@ -62,11 +67,16 @@ class AuthActivity : ComponentActivity() {
         setContent {
             ReadItTheme {
                 Column(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Button(onClick = { viewModel.launchAuthBrowser(this@AuthActivity) }) {
+                    Button(
+                        onClick = { viewModel.launchAuthBrowser(this@AuthActivity) },
+                        colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.orange))
+                    ) {
                         Text(text = "Authenticate")
                     }
                 }

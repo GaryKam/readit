@@ -14,9 +14,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.garykam.readit.ui.navigation.ReadItNavHost
 import io.github.garykam.readit.ui.theme.ReadItTheme
+import io.github.garykam.readit.util.PreferenceUtil
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -26,8 +29,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            ReadItTheme(darkTheme = false) {
-                ReadItApp()
+            var darkTheme by remember { mutableStateOf(PreferenceUtil.isDarkTheme()) }
+            WindowCompat.getInsetsController(window, LocalView.current).isAppearanceLightStatusBars = !darkTheme
+
+            ReadItTheme(darkTheme = darkTheme) {
+                ReadItApp(onThemeChange = { darkTheme = it })
             }
         }
     }
@@ -35,7 +41,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ReadItApp() {
+private fun ReadItApp(onThemeChange: (Boolean) -> Unit) {
     var appBarState by remember { mutableStateOf(AppBarState()) }
 
     Scaffold(
@@ -49,7 +55,8 @@ private fun ReadItApp() {
     ) { innerPadding ->
         ReadItNavHost(
             onAppBarStateUpdate = { appBarState = it },
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
+            onThemeChange = onThemeChange
         )
     }
 }

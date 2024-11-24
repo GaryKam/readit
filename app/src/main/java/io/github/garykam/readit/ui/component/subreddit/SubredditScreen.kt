@@ -127,13 +127,15 @@ fun SubredditScreen(
                         trailingIcon = {
                             IconButton(
                                 onClick = {
-                                    focusManager.clearFocus()
-                                    viewModel.changeSearch(activeSubreddit)
+                                    viewModel.changeSearch("")
+                                    scope.launch {
+                                        drawerState.close()
+                                    }
                                 }
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Clear,
-                                    contentDescription = "cancel search"
+                                    contentDescription = "clear search"
                                 )
                             }
                         }
@@ -155,7 +157,14 @@ fun SubredditScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onNavigateToProfile) {
+                    IconButton(
+                        onClick = {
+                            onNavigateToProfile()
+                            scope.launch {
+                                drawerState.close()
+                            }
+                        }
+                    ) {
                         AsyncImage(
                             model = user?.avatar,
                             contentDescription = "profile",
