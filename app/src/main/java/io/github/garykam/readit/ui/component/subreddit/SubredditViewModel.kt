@@ -72,8 +72,8 @@ class SubredditViewModel @Inject constructor(
         }
     }
 
-    fun changeSearch(subreddit: String) {
-        _subredditSearch.update { subreddit }
+    fun changeSearch(search: String) {
+        _subredditSearch.update { search }
     }
 
     fun searchSubreddit(query: String) {

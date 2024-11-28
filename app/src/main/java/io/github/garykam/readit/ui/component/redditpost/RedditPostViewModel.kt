@@ -34,7 +34,7 @@ class RedditPostViewModel @Inject constructor(
             val commentThreads = repository.getCommentsFromId(
                 subreddit.removePrefix("r/"),
                 postId.removePrefix("t3_"),
-                _commentSort.value
+                sortMap[_commentSort.value] ?: sortMap.values.first()
             )
 
             if (_content.value == null) {
