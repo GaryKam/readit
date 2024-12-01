@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -328,7 +329,7 @@ private fun RedditPost(
                     Gallery(
                         galleryData = post.galleryData!!,
                         mediaMetadata = post.mediaMetadata!!.toImmutableMap(),
-                        modifier = Modifier.heightIn(max = 300.dp)
+                        modifier = Modifier.requiredHeight(300.dp)
                     )
                 }
 

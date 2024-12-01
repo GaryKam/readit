@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -49,6 +50,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -200,7 +202,7 @@ private fun Content(post: RedditPostComment.Data) {
                         galleryData = post.galleryData!!,
                         mediaMetadata = post.mediaMetadata!!.toImmutableMap(),
                         modifier = Modifier
-                            .heightIn(max = 500.dp)
+                            .requiredHeight(500.dp)
                             .padding(bottom = 4.dp)
                     )
                 }
@@ -237,7 +239,7 @@ private fun Content(post: RedditPostComment.Data) {
                         url = post.videoData!!.data.dashUrl,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .sizeIn(maxHeight = 300.dp)
+                            .sizeIn(maxHeight = 400.dp)
                             .padding(bottom = 4.dp)
                     )
                 }

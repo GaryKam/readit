@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun Pill(
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.surfaceDim,
+    color: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     horizontalArrangement: Arrangement.Horizontal = Arrangement.Center,
     verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
     content: @Composable RowScope.() -> Unit
