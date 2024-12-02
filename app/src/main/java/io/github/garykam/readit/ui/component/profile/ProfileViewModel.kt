@@ -1,5 +1,7 @@
 package io.github.garykam.readit.ui.component.profile
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +20,7 @@ class ProfileViewModel @Inject constructor(
 ) : ViewModel() {
     private val _user = MutableStateFlow<RedditUser?>(null)
     val user = _user.asStateFlow()
+    var showLogOutDialog = mutableStateOf(false)
 
     fun logOut() {
         PreferenceUtil.logOut()

@@ -9,12 +9,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -93,13 +95,32 @@ fun ProfileScreen(
                 .height(100.dp)
         )
         Button(
-            onClick = {
-                onNavigateToAuth()
-                viewModel.logOut()
-            },
+            onClick = { viewModel.showLogOutDialog.value = true },
             colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.orange))
         ) {
             Text(text = "Log Out")
         }
+    }
+
+    if (viewModel.showLogOutDialog.value) {
+        AlertDialog(
+            onDismissRequest = { viewModel.showLogOutDialog.value = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onNavigateToAuth()
+                        viewModel.logOut()
+                    }
+                ) {
+                    Text(text = "Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.showLogOutDialog.value = false }) {
+                    Text(text = "Cancel")
+                }
+            },
+            text = { Text(text = "Are you sure you want to log out?") }
+        )
     }
 }
