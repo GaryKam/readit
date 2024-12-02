@@ -2,6 +2,7 @@ package io.github.garykam.readit.ui.component.redditpost
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -50,7 +50,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -136,7 +135,7 @@ fun RedditPostScreen(
                     Comment(
                         comment = comment,
                         modifier = Modifier
-                            .padding(start = startPadding, top = 2.dp, end = 16.dp, bottom = 2.dp)
+                            .padding(start = startPadding, end = 16.dp)
                             .combinedClickable(
                                 onLongClick = { areRepliesExpanded = !areRepliesExpanded },
                                 onClick = {}
@@ -163,6 +162,7 @@ private fun Content(post: RedditPostComment.Data) {
     Surface(shadowElevation = 8.dp) {
         Column(
             modifier = Modifier
+                .background(MaterialTheme.colorScheme.surfaceContainerLow)
                 .padding(vertical = 8.dp)
                 .fillMaxWidth()
         ) {
@@ -302,17 +302,17 @@ private fun Comment(
             )
         }
         Row(
-            modifier = Modifier.offset(y = -(15.dp)),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .offset(x = -(4.dp), y = -(15.dp))
+                .scale(0.7F)
         ) {
             Icon(
                 imageVector = Icons.Outlined.ThumbUp,
-                contentDescription = null,
-                modifier = Modifier.scale(0.7F)
+                contentDescription = null
             )
             Text(
                 text = comment.score.toString(),
-                style = MaterialTheme.typography.labelSmall
+                modifier = Modifier.padding(start = 4.dp)
             )
         }
     }
@@ -334,7 +334,7 @@ private fun CommentReplies(
             Comment(
                 comment = reply.data,
                 modifier = Modifier
-                    .padding(start = padding, top = 2.dp, end = 16.dp, bottom = 2.dp)
+                    .padding(start = padding, end = 16.dp)
                     .combinedClickable(
                         onLongClick = { areRepliesExpanded = !areRepliesExpanded },
                         onClick = {}

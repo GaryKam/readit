@@ -100,7 +100,6 @@ fun MediaPlayer(
                     painter = painterResource(if (isMuted) R.drawable.ic_volume_mute else R.drawable.ic_volume),
                     contentDescription = "volume",
                     modifier = Modifier.size(20.dp)
-
                 )
             }
         }

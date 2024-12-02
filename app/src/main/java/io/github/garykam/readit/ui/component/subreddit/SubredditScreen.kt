@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.sizeIn
@@ -37,6 +36,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -267,7 +267,10 @@ private fun RedditPosts(
             RedditPost(
                 post = post.data,
                 onPostClick = onPostClick,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                    .fillMaxWidth()
+
             )
         }
 
@@ -293,11 +296,11 @@ private fun RedditPost(
     modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = modifier,
+        modifier = Modifier,
         shadowElevation = 8.dp
     ) {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .clickable { onPostClick(post.id) }
                 .padding(vertical = 8.dp)
         ) {
